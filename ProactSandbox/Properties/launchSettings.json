@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "FalshSandbox": {
+    "ProactSandbox": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

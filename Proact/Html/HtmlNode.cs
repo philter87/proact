@@ -1,0 +1,13 @@
+﻿using Proact.Tag;
+
+namespace Proact.Html;
+
+public abstract class HtmlNode
+{
+    public abstract RenderState Render(RenderState renderState);
+    
+    public static implicit operator HtmlNode(string text) => new HtmlTextNode(text);
+    public static implicit operator HtmlNode(HtmlTagFunc func) => func();
+    public static implicit operator HtmlNode(List<HtmlNode> children) => new HtmlTag("span")
+        .AddChildren(children);
+}

@@ -1,27 +1,33 @@
-﻿namespace Proact.Tag;
+﻿using Proact.Html;
+
+namespace Proact.Tag;
 
 public delegate HtmlTag TriggerRender<in T> (T? value = default, IServiceProvider? serviceProvider = null);
 
 public class Trigger<T>
 {
-    private string Name { get; }
+    private string Id { get; }
     private readonly T? _value;
 
-    public Trigger(string name)
+    public Trigger(string id)
     {
-        Name = name;
+        Id = id;
         _value = default;
+    }
+    
+    public Trigger(string id, T value)
+    {
+        Id = id;
+        _value = value;
     }
 
     public JavascriptCode Run()
     {
-        return new JavascriptCode($"trigger('{Name}')");
+        return new JavascriptCode($"trigger('{Id}')");
     }
 
-    public HtmlTag On(TriggerRender<object> triggerRender)
+    public HtmlDynamic On(TriggerRender<object> triggerRender)
     {
-        var htmlTag = new HtmlTag(HtmlTag.TriggerTagName);
-        htmlTag.AddTriggeredHtmlTag(new TriggeredHtmlTag(triggerRender, Name, _value));
-        return htmlTag;
+        return new HtmlDynamic(triggerRender, Id, _value);
     }
 }

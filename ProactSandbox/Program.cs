@@ -1,4 +1,7 @@
+using System.Reflection.Metadata;
 using Proact;
+using Proact.ActionFilter;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddFlash();
+builder.Services.AddProact();
 
 var app = builder.Build();
 
@@ -27,3 +30,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+app.UseWebSockets();

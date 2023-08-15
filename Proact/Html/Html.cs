@@ -1,4 +1,4 @@
-﻿namespace Proact.Tag;
+﻿namespace Proact.Html;
 
 public static class Html
 {

@@ -5,12 +5,14 @@ namespace Proact.Tag;
 public class RenderState
 {
     public IServiceProvider ServiceProvider { get; }
+    public List<HtmlDynamic> TriggeredHtmlTags { get; }
     private readonly StringBuilder _builder = new();
     private string _indentation = "";
 
     public RenderState(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
+        TriggeredHtmlTags = new List<HtmlDynamic>();
     }
 
     public RenderState Add(string str)
@@ -33,6 +35,11 @@ public class RenderState
     public void LevelDecrement()
     {
         _indentation = _indentation[..^2];
+    }
+
+    public void AddTriggeredHtmlTag(HtmlDynamic htmlDynamic)
+    {
+        TriggeredHtmlTags.Add(htmlDynamic);
     }
 
     public string GetHtml()
