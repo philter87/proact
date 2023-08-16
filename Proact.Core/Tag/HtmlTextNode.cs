@@ -1,6 +1,4 @@
-﻿using Proact.Html;
-
-namespace Proact.Tag;
+﻿namespace Proact.Core.Tag;
 
 public class HtmlTextNode : HtmlNode
 {

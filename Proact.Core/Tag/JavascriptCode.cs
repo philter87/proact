@@ -1,4 +1,4 @@
-﻿namespace Proact.Tag;
+﻿namespace Proact.Core.Tag;
 
 public class JavascriptCode
 {

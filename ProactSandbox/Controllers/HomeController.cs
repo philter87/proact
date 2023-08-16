@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Proact.Html;
-using Proact.Tag;
-using static Proact.Html.Html;
+using Proact.Core;
+using Proact.Core.Tag;
+using static Proact.Core.Tags;
 
 namespace ProactSandbox.Controllers;
 
@@ -13,6 +13,8 @@ public class HomeController : Controller
     public HtmlNode Get()
     {
         var buttonClick = new Trigger<string>("buttonClicked");
+
+        var onInputChange = new Trigger<string>("onInputChange", "Nothing");
         var list = new List<HtmlNode>()
         {
             p()("First element in a list"),
@@ -22,12 +24,18 @@ public class HomeController : Controller
         return html()(
             head(),
             body()(
+                new Div()
+                {
+                    div()
+                },
                 div("btn-primary")(
                     p()("Hello World!"),
                     "Blabla",
                     div(),
                     button(onclick: buttonClick.Run())("RefreshTime!!!"),
-                    buttonClick.On((o,b) => p()(DateTimeOffset.Now.ToString("O"))),
+                    buttonClick.On((o, b) => p()(DateTimeOffset.Now.ToString("O"))),
+                    input(name: "firstName", oninput: onInputChange.RunUseThisValue()),
+                    onInputChange.On((v, sp) => p()(v.ToString())),
                     list.Select(s => s).ToList()
                 )
             )

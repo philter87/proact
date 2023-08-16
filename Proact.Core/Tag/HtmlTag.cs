@@ -1,34 +1,18 @@
-﻿using Proact.Tag;
+﻿using System.Collections;
 
-namespace Proact.Html;
+namespace Proact.Core.Tag;
 
-public class HtmlTag : HtmlNode
+public class HtmlTag : HtmlNode, IEnumerable<HtmlNode>
 {
     private readonly string _tag;
-    private readonly Dictionary<string, object> _attributes;
+    private Dictionary<string, object> Attributes { get; }
     private readonly List<HtmlNode> _children;
 
     public HtmlTag(string tag, params HtmlNode[] children)
     {
         _tag = tag;
-        _attributes = new Dictionary<string, object>();
         _children = children.ToList();
-    }
-    
-    public HtmlTag AddAttribute(string name, string? value)
-    {
-        if (value == null)
-        {
-            return this;
-        }
-        _attributes[name] = value;
-        return this;
-    }
-
-    public HtmlTag AddChildren(List<HtmlNode> children)
-    {
-        _children.AddRange(children);
-        return this;
+        Attributes = new Dictionary<string, object>();
     }
 
     public override RenderState Render(RenderState renderState)
@@ -58,9 +42,34 @@ public class HtmlTag : HtmlNode
 
     private string CreateAttributes()
     {
-        return _attributes.Count == 0 
+        return Attributes.Count == 0 
             ? "" 
-            : " " + string.Join(" ", _attributes.Select(kv => kv.Key + "=\"" + kv.Value + "\""));
+            : " " + string.Join(" ", Attributes.Select(kv => kv.Key + "=\"" + kv.Value + "\""));
+    }
+    
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    internal HtmlTag Add(string name, object? value)
+    {
+        if (value == null)
+        {
+            return this;
+        }
+        Attributes[name] = value;
+        return this;
+    }
+    
+    public void Add(HtmlNode node)
+    {
+        _children.Add(node);
+    }
+
+    public IEnumerator<HtmlNode> GetEnumerator()
+    {
+        return _children.GetEnumerator();
     }
 }
 

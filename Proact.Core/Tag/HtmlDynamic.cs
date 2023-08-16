@@ -1,6 +1,4 @@
-﻿using Proact.Html;
-
-namespace Proact.Tag;
+﻿namespace Proact.Core.Tag;
 
 public class HtmlDynamic : HtmlNode
 {
@@ -23,7 +21,7 @@ public class HtmlDynamic : HtmlNode
     public RenderState Render(RenderState renderState, object? value)
     {
         var tag = _triggerRender(value, renderState.ServiceProvider);
-        tag?.AddAttribute("data-trigger-id", TriggerId);
+        tag?.Add("data-trigger-id", TriggerId);
         tag?.Render(renderState);
         renderState.AddTriggeredHtmlTag(this);
         return renderState;

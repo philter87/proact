@@ -1,8 +1,10 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 using Proact;
-using Proact.Tag;
-using static Proact.Html.Html;
+using Proact.Core;
+using Proact.Core.Tag;
+using static Proact.Core.Tags;
 
 namespace ProactTests;
 
@@ -61,6 +63,23 @@ public class ProactServiceTests
         var html = sut.HandlePartialRender(CreateBody(newValue));
         
         AssertEqual($"<p data-trigger-id=\"{TriggerId}\">{newValue}</p>", html);
+    }
+
+    [Fact]
+    public void Static_method_calls_and_new_class_is_the_same()
+    {
+        var sut = CreateProactService();
+        var tags = new Div("btn-primary")
+        {
+            new P()
+            {
+                "Hello World!"
+            },
+        };
+
+        var actual = sut.HandleFullRender(tags);
+        var expected = sut.HandleFullRender(div("btn-primary")(p()("Hello World!")));
+        Assert.Equal(expected, actual);
     }
 
     private static TriggerExecutedBody CreateBody(string newValue)

@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Proact.Tag;
+namespace Proact.Core.Tag;
 
 public class RenderState
 {

@@ -19,5 +19,9 @@ async function trigger(triggerName, value) {
     let htmlRaw = await response.text();
 
     let element = document.querySelector('[data-trigger-id="' + triggerName + '"]')
-    element.outerHTML = htmlRaw
+    if(element){
+        element.outerHTML = htmlRaw
+    } else {
+        console.log("The trigger with id '" + triggerName + "' was not attached to any html element")
+    }
 }

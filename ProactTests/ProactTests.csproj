@@ -24,7 +24,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Proact\Proact.csproj" />
+      <ProjectReference Include="..\Proact.Core\Proact.Core.csproj" />
+      <ProjectReference Include="..\Proact.Web\Proact.Web.csproj" />
     </ItemGroup>
 
 </Project>

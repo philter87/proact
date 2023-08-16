@@ -2,8 +2,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Proact.Html;
-using Proact.Tag;
+using Proact.Core.Tag;
 
 namespace Proact.ActionFilter;
 

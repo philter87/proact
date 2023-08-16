@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Proact;
+﻿namespace Proact;
 
 internal static class HotReload
 {

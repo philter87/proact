@@ -2,7 +2,7 @@
 
 public static class LoadFlashRuntime
 {
-    private const string NamespaceDirectory = "Proact.Resources.";
+    private const string NamespaceDirectory = "Proact.Core.Resources.";
     public static readonly string FlashJavascriptRuntime = ReadFlashJavascriptRuntime();
 
     public static string ReadFlashJavascriptRuntime()
@@ -14,8 +14,6 @@ public static class LoadFlashRuntime
     {
         var namespacePath = NamespaceDirectory + fileName;
         var stream = typeof(LoadFlashRuntime).Assembly.GetManifestResourceStream(namespacePath);
-        var fileContent = new StreamReader(stream).ReadToEnd();
-
-        return fileContent;
+        return new StreamReader(stream).ReadToEnd();
     }
 }

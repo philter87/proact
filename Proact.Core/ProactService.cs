@@ -1,5 +1,4 @@
-﻿using Proact.Html;
-using Proact.Tag;
+﻿using Proact.Core.Tag;
 
 namespace Proact;
 

@@ -1,6 +1,4 @@
-﻿using Proact.Html;
-
-namespace Proact.Tag;
+﻿namespace Proact.Core.Tag;
 
 public delegate HtmlTag TriggerRender<in T> (T? value = default, IServiceProvider? serviceProvider = null);
 
@@ -24,6 +22,11 @@ public class Trigger<T>
     public JavascriptCode Run()
     {
         return new JavascriptCode($"trigger('{Id}')");
+    }
+    
+    public JavascriptCode RunUseThisValue()
+    {
+        return new JavascriptCode($"trigger('{Id}', this.value)");
     }
 
     public HtmlDynamic On(TriggerRender<object> triggerRender)
