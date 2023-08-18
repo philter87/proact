@@ -25,18 +25,18 @@ public class DynamicValue
 
     public JavascriptCode Run()
     {
-        return new JavascriptCode($"trigger('{Id}')");
+        return new JavascriptCode($"trigger({{Id:'{Id}'}})");
     }
 
     public JavascriptCode Run(ValueMapper<object> valueMapper)
     {
         ValueMapper = valueMapper;
-        return new JavascriptCode($"trigger('{Id}', {{'IsValueMapper': true, InitialValue: '{InitialValue}'}})");
+        return new JavascriptCode($"trigger({{Id: '{Id}', IsValueMapper: true, InitialValue: '{InitialValue}'}})");
     }
     
     public JavascriptCode RunUseThisValue()
     {
-        return new JavascriptCode($"trigger('{Id}', {{'value': this.value}})");
+        return new JavascriptCode($"trigger({{Id: '{Id}', 'value': this.value}})");
     }
 
     public DynamicHtml On(ValueRender<object> valueRender)

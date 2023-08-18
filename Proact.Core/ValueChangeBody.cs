@@ -1,11 +1,4 @@
 ﻿namespace Proact;
-
-public class ValueChangeBody
-{
-    public TriggerOptions? TriggerOptions { get; set; }
-    public string TriggerId { get; set; }
-}
-
 public class DynamicHtmlResult
 {
     public object? InitialValue { get; set; }
@@ -15,7 +8,17 @@ public class DynamicHtmlResult
 
 public class TriggerOptions
 {
-    public string Value { get; set; }
-    public bool IsValueEmpty { get; set; }
+    public TriggerOptions(string id)
+    {
+        Id = id;
+    }
+
+    public TriggerOptions()
+    {
+    }
+
+    public string Id { get; set; }
+    public string? Value { get; set; }
+    
     public bool IsValueMapper { get; set; }
 }

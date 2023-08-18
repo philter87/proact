@@ -1,20 +1,15 @@
 let proactCurrentValueMap = {};
 
-async function trigger(triggerName, triggerOptions) {
+async function trigger(triggerOptions) {
     if(triggerOptions?.IsValueMapper) {
         
-        triggerOptions.Value = proactCurrentValueMap[triggerName] || triggerOptions.InitialValue;
-        console.log("IsValueMapper", triggerOptions)
+        triggerOptions.Value = proactCurrentValueMap[triggerOptions.Id] || triggerOptions.InitialValue;
+        
     }
+    console.log("IsValueMapper", triggerOptions)
     
-    let json = JSON.stringify({
-        triggerOptions: triggerOptions,
-        triggerId: triggerName
-    });
-    
-    console.log(json)
-    let encodedString = window.btoa(json);
-    let url = window.location.pathname + "?" + new URLSearchParams({triggerBody: encodedString})
+    let encodedString = window.btoa(JSON.stringify(triggerOptions));
+    let url = window.location.pathname + "?" + new URLSearchParams({triggerOptions: encodedString})
     let response = await fetch(url, {
         method: "GET",
         headers: {
@@ -27,10 +22,10 @@ async function trigger(triggerName, triggerOptions) {
     let jsonResult = await response.json();
     console.log(jsonResult);
     if(jsonResult?.Value) {
-        proactCurrentValueMap[triggerName] = jsonResult?.Value
+        proactCurrentValueMap[triggerOptions.Id] = jsonResult?.Value
     }
 
-    let element = document.querySelector('[data-trigger-id="' + triggerName + '"]')
+    let element = document.querySelector('[data-trigger-id="' + triggerOptions.Id + '"]')
     if(element){
         element.outerHTML = jsonResult.Html
     } else {

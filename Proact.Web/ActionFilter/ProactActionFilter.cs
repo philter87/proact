@@ -9,7 +9,7 @@ namespace Proact.ActionFilter;
 
 public class ProactActionFilter : IActionFilter
 {
-    private const string TriggerBody = "triggerBody";
+    private const string TriggerOptions = "triggerOptions";
     private readonly ProactService _proactService;
 
     public ProactActionFilter(ProactService proactService)
@@ -20,7 +20,7 @@ public class ProactActionFilter : IActionFilter
     public void OnActionExecuting(ActionExecutingContext context)
     {
         var query = context.HttpContext.Request.Query;
-        if (!query.ContainsKey(TriggerBody))
+        if (!query.ContainsKey(TriggerOptions))
         {
             return;
         }
@@ -38,11 +38,11 @@ public class ProactActionFilter : IActionFilter
         }
     }
     
-    private ValueChangeBody? ParseTriggerBody(IQueryCollection query)
+    private TriggerOptions? ParseTriggerBody(IQueryCollection query)
     {
-        byte[] data = Convert.FromBase64String(query["triggerBody"]);
+        byte[] data = Convert.FromBase64String(query[TriggerOptions]);
         string decodedString = System.Text.Encoding.UTF8.GetString(data);
-        return JsonSerializer.Deserialize<ValueChangeBody>(decodedString, new JsonSerializerOptions()
+        return JsonSerializer.Deserialize<TriggerOptions>(decodedString, new JsonSerializerOptions()
         {
             PropertyNameCaseInsensitive = true
         });

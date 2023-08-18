@@ -81,16 +81,12 @@ public class ProactServiceTests
         Assert.Equal(expected, actual);
     }
 
-    private static ValueChangeBody CreateBody(string newValue)
+    private static TriggerOptions CreateBody(string newValue)
     {
-        return new ValueChangeBody()
+        return new TriggerOptions()
         {
-            TriggerId = TriggerId,
-            TriggerOptions = new TriggerOptions()
-            {
-                Value = newValue,
-                IsValueEmpty = false,
-            }
+            Id = TriggerId,
+            Value = newValue,
         };
     }
 

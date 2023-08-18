@@ -12,13 +12,13 @@ public class ProactService
         _serviceProvider = serviceProvider;
     }
 
-    public DynamicHtmlResult? HandlePartialRender(ValueChangeBody? triggerBody)
+    public DynamicHtmlResult? HandlePartialRender(TriggerOptions? triggerOptions)
     {
-        if (triggerBody != null && _dynamicHtml.TryGetValue(triggerBody.TriggerId, out var dynamicHtml))
+        if (triggerOptions != null && _dynamicHtml.TryGetValue(triggerOptions.Id, out var dynamicHtml))
         {
             var renderState = new RenderState(_serviceProvider);
 
-            return dynamicHtml.Render(renderState, triggerBody.TriggerOptions?.Value);
+            return dynamicHtml.Render(renderState, triggerOptions.Value);
         }
 
         return null;
