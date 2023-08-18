@@ -5,14 +5,14 @@ namespace Proact.Core.Tag;
 public class RenderState
 {
     public IServiceProvider ServiceProvider { get; }
-    public List<HtmlDynamic> TriggeredHtmlTags { get; }
+    public List<DynamicHtml> DynamicHtmlTags { get; }
     private readonly StringBuilder _builder = new();
     private string _indentation = "";
 
     public RenderState(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
-        TriggeredHtmlTags = new List<HtmlDynamic>();
+        DynamicHtmlTags = new List<DynamicHtml>();
     }
 
     public RenderState Add(string str)
@@ -37,9 +37,9 @@ public class RenderState
         _indentation = _indentation[..^2];
     }
 
-    public void AddTriggeredHtmlTag(HtmlDynamic htmlDynamic)
+    public void AddTriggeredHtmlTag(DynamicHtml dynamicHtml)
     {
-        TriggeredHtmlTags.Add(htmlDynamic);
+        DynamicHtmlTags.Add(dynamicHtml);
     }
 
     public string GetHtml()

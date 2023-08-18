@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Proact.Core;
 using Proact.Core.Tag;
 
 namespace Proact.ActionFilter;
@@ -25,7 +26,7 @@ public class ProactActionFilter : IActionFilter
         }
 
         var triggerBody = ParseTriggerBody(query);
-        context.Result = HtmlResult(_proactService.HandlePartialRender(triggerBody));
+        context.Result = JsonResult(_proactService.HandlePartialRender(triggerBody));
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
@@ -37,11 +38,11 @@ public class ProactActionFilter : IActionFilter
         }
     }
     
-    private TriggerExecutedBody? ParseTriggerBody(IQueryCollection query)
+    private ValueChangeBody? ParseTriggerBody(IQueryCollection query)
     {
         byte[] data = Convert.FromBase64String(query["triggerBody"]);
         string decodedString = System.Text.Encoding.UTF8.GetString(data);
-        return JsonSerializer.Deserialize<TriggerExecutedBody>(decodedString, new JsonSerializerOptions()
+        return JsonSerializer.Deserialize<ValueChangeBody>(decodedString, new JsonSerializerOptions()
         {
             PropertyNameCaseInsensitive = true
         });
@@ -57,6 +58,20 @@ public class ProactActionFilter : IActionFilter
         {
             ContentType = "text/html",
             Content = html
+        };
+    }
+
+    private static ContentResult? JsonResult(DynamicHtmlResult? dynamicHtmlResult)
+    {
+        if (dynamicHtmlResult == null)
+        {
+            return null;
+        }
+
+        return new ContentResult()
+        {
+            ContentType = "application/json",
+            Content = JsonSerializer.Serialize(dynamicHtmlResult),
         };
     }
 }

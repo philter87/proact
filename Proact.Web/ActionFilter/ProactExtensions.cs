@@ -1,4 +1,6 @@
-﻿namespace Proact.ActionFilter;
+﻿using Proact.Core;
+
+namespace Proact.ActionFilter;
 
 public static class ProactExtensions
 {

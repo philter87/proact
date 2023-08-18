@@ -1,23 +1,24 @@
 ﻿using Proact.Core.Tag;
 
-namespace Proact;
+namespace Proact.Core;
 
 public class ProactService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, HtmlDynamic> _triggeredHtmlTags = new();
+    private readonly Dictionary<string, DynamicHtml> _dynamicHtml = new();
 
     public ProactService(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public string? HandlePartialRender(TriggerExecutedBody? triggerBody)
+    public DynamicHtmlResult? HandlePartialRender(ValueChangeBody? triggerBody)
     {
-        if (triggerBody != null && _triggeredHtmlTags.TryGetValue(triggerBody.TriggerId, out var trigger))
+        if (triggerBody != null && _dynamicHtml.TryGetValue(triggerBody.TriggerId, out var dynamicHtml))
         {
             var renderState = new RenderState(_serviceProvider);
-            return trigger.Render(renderState, triggerBody.Value).GetHtml();
+
+            return dynamicHtml.Render(renderState, triggerBody.TriggerOptions?.Value);
         }
 
         return null;
@@ -33,6 +34,6 @@ public class ProactService
 
     private void CacheHtmlTags(RenderState renderState)
     {
-        renderState.TriggeredHtmlTags.ForEach(t => _triggeredHtmlTags[t.TriggerId] = t);
+        renderState.DynamicHtmlTags.ForEach(dt => _dynamicHtml[dt.GetValueId()] = dt);
     }
 }

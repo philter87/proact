@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 using Proact;
 using Proact.Core;
 using Proact.Core.Tag;
@@ -39,7 +38,7 @@ public class ProactServiceTests
     public void HandleFullRender_with_trigger()
     {
         var sut = CreateProactService();
-        var trigger = new Trigger<string>(TriggerId, DefaultValue);
+        var trigger = new DynamicValue(TriggerId, DefaultValue);
         var tag = div()(
             trigger.On((v, s) => p()(v?.ToString()))
         );
@@ -53,7 +52,7 @@ public class ProactServiceTests
     public void HandleFullRender_with_trigger_partial_render()
     {
         var sut = CreateProactService();
-        var trigger = new Trigger<string>(TriggerId, DefaultValue);
+        var trigger = new DynamicValue(TriggerId, DefaultValue);
         var tag = div()(
             trigger.On((v, s) => p()(v?.ToString()))
         );
@@ -62,7 +61,7 @@ public class ProactServiceTests
         sut.HandleFullRender(tag);
         var html = sut.HandlePartialRender(CreateBody(newValue));
         
-        AssertEqual($"<p data-trigger-id=\"{TriggerId}\">{newValue}</p>", html);
+        AssertEqual($"<p data-trigger-id=\"{TriggerId}\">{newValue}</p>", html?.Html);
     }
 
     [Fact]
@@ -82,13 +81,16 @@ public class ProactServiceTests
         Assert.Equal(expected, actual);
     }
 
-    private static TriggerExecutedBody CreateBody(string newValue)
+    private static ValueChangeBody CreateBody(string newValue)
     {
-        return new TriggerExecutedBody()
+        return new ValueChangeBody()
         {
             TriggerId = TriggerId,
-            Value = newValue,
-            IsValueEmpty = false,
+            TriggerOptions = new TriggerOptions()
+            {
+                Value = newValue,
+                IsValueEmpty = false,
+            }
         };
     }
 
@@ -99,7 +101,7 @@ public class ProactServiceTests
         return sut;
     }
 
-    private void AssertEqual(string expectedString, string html)
+    private void AssertEqual(string expectedString, string? html)
     {
         html = RemoveDoubleSpace(RemoveLineBreaks(html));
         Assert.Equal(expectedString, html);
