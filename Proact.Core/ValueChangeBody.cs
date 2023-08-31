@@ -1,24 +1,22 @@
 ﻿namespace Proact;
 public class DynamicHtmlResult
 {
-    public object? InitialValue { get; set; }
+    public string? InitialValue { get; set; }
     public object? Value { get; set; }
-    public string? Html { get; set; }
+    public Dictionary<string, string> IdToHtml { get; set; } = new();
 }
 
 public class TriggerOptions
 {
-    public TriggerOptions(string id)
+    public TriggerOptions(string id, string? value, string? valueMapperId = null)
     {
         Id = id;
-    }
-
-    public TriggerOptions()
-    {
+        Value = value;
+        ValueMapperId = valueMapperId;
     }
 
     public string Id { get; set; }
     public string? Value { get; set; }
     
-    public bool IsValueMapper { get; set; }
+    public string? ValueMapperId { get; set; }
 }

@@ -12,11 +12,11 @@ public class HomeController : Controller
     [HttpGet]
     public HtmlNode Get()
     {
-        var buttonClick = new DynamicValue("buttonClicked");
+        var buttonClick = DynamicValue.Create("buttonClicked", "");
 
-        var counter = new DynamicValue("incrementCounter", 0);
+        var counter = DynamicValue.Create("incrementCounter", 0);
 
-        var onInputChange = new DynamicValue("onInputChange", "Nothing");
+        var onInputChange = DynamicValue.Create("onInputChange", "Nothing");
         var list = new List<HtmlNode>()
         {
             p()("First element in a list"),
@@ -36,10 +36,11 @@ public class HomeController : Controller
                     div(),
                     button(onclick: buttonClick.Run())("RefreshTime!!!"),
                     buttonClick.On((o, b) => p()(DateTimeOffset.Now.ToString("O"))),
-                    input(name: "firstName", oninput: onInputChange.RunUseThisValue()),
+                    input(name: "firstName", oninput: onInputChange.SetFromThisValue()),
                     onInputChange.On((v, sp) => p()(v.ToString())),
                     list.Select(s => s).ToList(),
-                    button(onclick: counter.Run((v, sp) => (int.Parse(v.ToString()) + 1).ToString()))("Increment counter"),
+                    button(onclick: counter.Set((v, sp) => v + 1))
+                        ("Increment counter"),
                     counter.On((v, sp) => span()(v.ToString()))
                 )
             )

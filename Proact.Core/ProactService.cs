@@ -5,26 +5,42 @@ namespace Proact.Core;
 public class ProactService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, DynamicHtml> _dynamicHtml = new();
+    private readonly Dictionary<string, DynamicValueObject> _dynamicValues = new();
 
     public ProactService(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public DynamicHtmlResult? HandlePartialRender(TriggerOptions? triggerOptions)
+    public DynamicHtmlResult? RenderPartial(TriggerOptions? triggerOptions)
     {
-        if (triggerOptions != null && _dynamicHtml.TryGetValue(triggerOptions.Id, out var dynamicHtml))
+        if (triggerOptions == null)
         {
-            var renderState = new RenderState(_serviceProvider);
-
-            return dynamicHtml.Render(renderState, triggerOptions.Value);
+            return null;
         }
 
-        return null;
+        if (!_dynamicValues.ContainsKey(triggerOptions.Id))
+        {
+            return null;
+        }
+        
+        var value = triggerOptions.Value;
+        var dynamicValue = _dynamicValues[triggerOptions.Id];
+        if (triggerOptions.ValueMapperId != null)
+        {
+            value = dynamicValue.MapValue(triggerOptions.ValueMapperId, value, _serviceProvider);
+        }
+        
+        return new DynamicHtmlResult()
+        {
+            IdToHtml = dynamicValue.GetDynamicHtml()
+                .ToDictionary(dh => dh.GetDynamicHtmlId(), dh => dh.RenderStateValue(new RenderState(_serviceProvider), value).GetHtml()),
+            Value = value,
+            InitialValue = dynamicValue.InitialValue,
+        };
     }
     
-    public string HandleFullRender(HtmlTag tag)
+    public string Render(HtmlTag tag)
     {
         var renderState = tag.Render(new RenderState(_serviceProvider));
         CacheHtmlTags(renderState);
@@ -34,6 +50,9 @@ public class ProactService
 
     private void CacheHtmlTags(RenderState renderState)
     {
-        renderState.DynamicHtmlTags.ForEach(dt => _dynamicHtml[dt.GetValueId()] = dt);
+        foreach (var dynamicValueKv in renderState.DynamicValues)
+        {
+            _dynamicValues[dynamicValueKv.TriggerId] = dynamicValueKv;
+        }
     }
 }

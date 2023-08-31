@@ -26,7 +26,7 @@ public class ProactActionFilter : IActionFilter
         }
 
         var triggerBody = ParseTriggerBody(query);
-        context.Result = JsonResult(_proactService.HandlePartialRender(triggerBody));
+        context.Result = JsonResult(_proactService.RenderPartial(triggerBody));
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
@@ -34,7 +34,7 @@ public class ProactActionFilter : IActionFilter
         // The context is forwarded to the flashService which is a singleton an able to cache results
         if (context.Result is ObjectResult { Value: HtmlTag tag })
         {
-            context.Result = HtmlResult(_proactService.HandleFullRender(tag));
+            context.Result = HtmlResult(_proactService.Render(tag));
         }
     }
     

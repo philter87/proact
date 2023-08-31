@@ -2,11 +2,15 @@
 
 public class DynamicHtml : HtmlNode
 {
-    private readonly DynamicValue _dynamicValue;
+    private readonly DynamicValueObject _dynamicValue;
+    private readonly string _dynamicHtmlId;
+    private readonly ValueRender<string> _valueRender;
 
-    public DynamicHtml(DynamicValue dynamicValue)
+    public DynamicHtml(DynamicValueObject dynamicValue, string dynamicHtmlId, ValueRender<string> valueRender)
     {
         _dynamicValue = dynamicValue;
+        _dynamicHtmlId = dynamicHtmlId;
+        _valueRender = valueRender;
     }
 
     public override RenderState Render(RenderState renderState)
@@ -14,29 +18,27 @@ public class DynamicHtml : HtmlNode
         return RenderStateValue(renderState, _dynamicValue.InitialValue);
     }
     
-    public DynamicHtmlResult? Render(RenderState renderState, object? value)
+    public RenderState RenderStateValue(RenderState renderState, string? value)
     {
-        var newValue = _dynamicValue.ValueMapper(value, renderState.ServiceProvider);
-        renderState = RenderStateValue(renderState, newValue);
-        return new DynamicHtmlResult()
-        {
-            Html = renderState.GetHtml(),
-            Value = newValue,
-            InitialValue = _dynamicValue.InitialValue,
-        };
-    }
-    
-    private RenderState RenderStateValue(RenderState renderState, object? value)
-    {
-        var tag = _dynamicValue.ValueRender?.Invoke(value, renderState.ServiceProvider);
-        tag?.Add("data-trigger-id", _dynamicValue.Id);
+        var tag = _valueRender.Invoke(value, renderState.ServiceProvider);
+        tag.Add("data-dynamic-html-id", _dynamicHtmlId);
         tag?.Render(renderState);
-        renderState.AddTriggeredHtmlTag(this);
+        renderState.AddDynamicHtmlTags(this);
         return renderState;
     }
 
     public string GetValueId()
     {
-        return _dynamicValue.Id;
+        return _dynamicValue.TriggerId;
+    }
+
+    public DynamicValueObject GetValue()
+    {
+        return _dynamicValue;
+    }
+
+    public string GetDynamicHtmlId()
+    {
+        return _dynamicHtmlId;
     }
 }

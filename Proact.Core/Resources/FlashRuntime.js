@@ -1,13 +1,12 @@
 let proactCurrentValueMap = {};
 
 async function trigger(triggerOptions) {
-    if(triggerOptions?.IsValueMapper) {
+    if(triggerOptions?.ValueMapperId) {
         
-        triggerOptions.Value = proactCurrentValueMap[triggerOptions.Id] || triggerOptions.InitialValue;
+        triggerOptions.Value = proactCurrentValueMap[triggerOptions.Id] || triggerOptions.InitialValue + '';
         
     }
-    console.log("IsValueMapper", triggerOptions)
-    
+    console.log("triggerOptions", triggerOptions)
     let encodedString = window.btoa(JSON.stringify(triggerOptions));
     let url = window.location.pathname + "?" + new URLSearchParams({triggerOptions: encodedString})
     let response = await fetch(url, {
@@ -20,15 +19,16 @@ async function trigger(triggerOptions) {
     
     
     let jsonResult = await response.json();
-    console.log(jsonResult);
     if(jsonResult?.Value) {
         proactCurrentValueMap[triggerOptions.Id] = jsonResult?.Value
     }
-
-    let element = document.querySelector('[data-trigger-id="' + triggerOptions.Id + '"]')
-    if(element){
-        element.outerHTML = jsonResult.Html
-    } else {
-        console.log("The trigger with id '" + triggerName + "' was not attached to any html element")
+    
+    for (let id of Object.keys(jsonResult.IdToHtml)){
+        let element = document.querySelector('[data-dynamic-html-id="' + id + '"]')
+        if(element){
+            element.outerHTML = jsonResult.IdToHtml[id]
+        } else {
+            console.log("The dynamic html with id '" + id + "' changed by '" + triggerOptions.Id + "' was not found")
+        }
     }
 }
