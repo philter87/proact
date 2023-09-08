@@ -1,7 +1,4 @@
-using System.Reflection.Metadata;
-using Proact;
 using Proact.ActionFilter;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +18,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    
+    // Use websockets to refresh browser on hot-reload
+    app.UseWebSockets();
 }
 
 app.UseHttpsRedirection();
@@ -30,5 +30,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-app.UseWebSockets();

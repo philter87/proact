@@ -12,6 +12,7 @@ public class HomeController : Controller
     [HttpGet]
     public HtmlNode Get()
     {
+        var formSubmit = DynamicValue.Create<SignUpForm?>("formSubmitted", null);
         var buttonClick = DynamicValue.Create("buttonClicked", "");
 
         var counter = DynamicValue.Create("incrementCounter", 0);
@@ -26,22 +27,27 @@ public class HomeController : Controller
         return html()(
             head(),
             body()(
-                new Div()
-                {
-                    div()
-                },
                 div("btn-primary")(
-                    p()("Hello World!"),
+                    p()("Hello World"),
                     "Blabla",
                     div(),
                     button(onclick: buttonClick.Run())("RefreshTime!!!"),
-                    buttonClick.On((o, b) => p()(DateTimeOffset.Now.ToString("O"))),
+                    buttonClick.On(() => p()(DateTimeOffset.Now.ToString("O"))),
+                    buttonClick.On(() => p()(DateTimeOffset.Now.ToString("T"))),
                     input(name: "firstName", oninput: onInputChange.SetFromThisValue()),
-                    onInputChange.On((v, sp) => p()(v.ToString())),
+                    onInputChange.On((v) => p()(v.ToString())),
+                    onInputChange,
                     list.Select(s => s).ToList(),
-                    button(onclick: counter.Set((v, sp) => v + 1))
-                        ("Increment counter"),
-                    counter.On((v, sp) => span()(v.ToString()))
+                    button(onclick: counter.Set((v, sp) => v + 1))("Increment counter"),
+                    counter.On((v, sp) => span()(v.ToString())),
+                    counter,
+                    new Form(onsubmit: formSubmit.SetOnSubmit())
+                    {
+                        new Input(type:"text", name:nameof(SignUpForm.FirstName)),
+                        new Input(type:"text", name:nameof(SignUpForm.SecondName)),
+                        new Input(type:"submit", value: "Submit")
+                    },
+                    formSubmit.On(v => v == null ? div()("Empty") : div()(v.FirstName + " " + v.SecondName))
                 )
             )
         );

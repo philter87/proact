@@ -18,7 +18,8 @@ public static class TagsMeta
         {"h4", CreateAttributes()},
         {"h5", CreateAttributes()},
         {"h6", CreateAttributes()},
-        {"input", CreateAttributes("type", "name", "oninput")},
+        {"form", CreateAttributes("onsubmit","name", "action", "method", "enctype", "target")},
+        {"input", CreateAttributes("type", "name", "oninput", "value")},
         {"button", CreateAttributes("name", "type", "value")},
     }.ToImmutableDictionary();
 
