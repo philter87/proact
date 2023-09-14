@@ -64,6 +64,6 @@ steps:
     publishFeedCredentials: NugetProactServiceConnection
 - script: dotnet publish ./Proact.Page/Proact.Page.csproj -o ./Proact.Page/publish
   displayName: "Publish ProactPage"
-- publish: ./Proact.Page/publish.zip
+- publish: ./Proact.Page/publish
   displayName: 'Persist pipeline artifact for deployments'
   artifact: drop
