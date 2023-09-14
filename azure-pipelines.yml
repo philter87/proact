@@ -41,4 +41,4 @@ steps:
   inputs:
     command: push
     nuGetFeedType: external
-    publishFeedCredentials: ProactNugetServiceConnection
+    publishFeedCredentials: NugetProactServiceConnection
