@@ -54,14 +54,6 @@ steps:
     publishFeedCredentials: NugetProactServiceConnection
 - script: dotnet publish ./Proact.Page/Proact.Page.csproj -o ./Proact.Page/publish
   displayName: "Build Azure function code "
-- task: ArchiveFiles@2
-  displayName: "Archive build artifact"
-  inputs:
-    rootFolderOrFile: './Proact.Page/publish'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: './Proact.Page/publish.zip'
-    replaceExistingArchive: true
-- publish: ./Proact.Page/publish.zip
+- publish: ./Proact.Page/publish
   displayName: 'Persist pipeline artifact for deployments'
   artifact: drop
