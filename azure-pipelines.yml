@@ -21,6 +21,11 @@ steps:
     version: 6.x
     performMultiLevelLookup: true
     includePreviewVersions: true
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    arguments: '--configuration Release'
+  displayName: 'dotnet build Release'
 - task: Cache@2
   displayName: Cache
   inputs:
@@ -30,11 +35,6 @@ steps:
       nuget
     path: '$(NUGET_PACKAGES)'
     cacheHitVar: 'CACHE_RESTORED'
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'build'
-    arguments: '--configuration Release'
-  displayName: 'dotnet build Release'
 - task: NuGetCommand@2
   inputs:
     command: pack
