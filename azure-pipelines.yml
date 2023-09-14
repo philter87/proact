@@ -15,15 +15,6 @@ pool:
   vmImage: 'windows-2022'
 
 steps:
-- task: Cache@2
-  displayName: Cache
-  inputs:
-    key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**,!Proact.Page/**/packages.lock.json'
-    restoreKeys: |
-      nuget | "$(Agent.OS)"
-      nuget
-    path: '$(NUGET_PACKAGES)'
-    cacheHitVar: 'CACHE_RESTORED'
 - task: UseDotNet@2
   displayName: 'Install .NET Core SDK'
   inputs:
