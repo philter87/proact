@@ -7,6 +7,7 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <IsPackable>true</IsPackable>
         <PackageReadmeFile>readme.md</PackageReadmeFile>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
     
     <ItemGroup>

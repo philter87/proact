@@ -12,7 +12,7 @@ trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'windows-2022'
 
 steps:
 - task: UseDotNet@2
