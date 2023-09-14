@@ -10,4 +10,14 @@ public static class ProactExtensions
         services.AddSingleton<ProactService>();
         return services;
     }
+
+    public static WebApplication UseProact(this WebApplication app)
+    {
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseWebSockets();
+        }
+
+        return app;
+    }
 }

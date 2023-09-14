@@ -4,8 +4,8 @@
 # https://aka.ms/yaml
 
 variables:
-  Major: '1'
-  Minor: '0'
+  Major: '0'
+  Minor: '2'
   Patch: '0'
 
 trigger:
@@ -52,3 +52,16 @@ steps:
     command: push
     nuGetFeedType: external
     publishFeedCredentials: NugetProactServiceConnection
+- script: dotnet publish .\Proact.Page/Proact.Page.csproj -o ./Proact.Page/publish
+  displayName: "Build Azure function code "
+- task: ArchiveFiles@2
+  displayName: "Archive build artifact"
+  inputs:
+    rootFolderOrFile: './Proact.Page/publish'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: './Proact.Page/publish.zip'
+    replaceExistingArchive: true
+- publish: ./Proact.Page/publish.zip
+  displayName: 'Persist pipeline artifact for deployments'
+  artifact: drop

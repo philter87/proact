@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proact.Core", "Proact.Core\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proact.Generator", "Proact.Generator\Proact.Generator.csproj", "{7D6C16F4-B7DF-4204-AADF-C9DA92122986}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proact.Page", "Proact.Page\Proact.Page.csproj", "{53EC1113-A29E-4066-B5EA-F58570A5AC5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{7D6C16F4-B7DF-4204-AADF-C9DA92122986}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D6C16F4-B7DF-4204-AADF-C9DA92122986}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D6C16F4-B7DF-4204-AADF-C9DA92122986}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53EC1113-A29E-4066-B5EA-F58570A5AC5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53EC1113-A29E-4066-B5EA-F58570A5AC5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53EC1113-A29E-4066-B5EA-F58570A5AC5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53EC1113-A29E-4066-B5EA-F58570A5AC5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

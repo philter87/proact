@@ -28,7 +28,7 @@ public class HomeController : Controller
             head(),
             body()(
                 div("btn-primary")(
-                    p()("Hello World"),
+                    p()("Hello World!"),
                     "Blabla",
                     div(),
                     button(onclick: buttonClick.Run())("RefreshTime!!!"),

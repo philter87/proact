@@ -36,7 +36,7 @@ const proactFormSubmit = (triggerOpts, event) => {
     trigger(triggerOpts)
 }
 
-let webSocket = new WebSocket('wss://localhost:7249/ws')
+let webSocket = new WebSocket('wss://' + window.location.host + '/ws')
 
 webSocket.onopen = () => {
     console.log("WS Open")
