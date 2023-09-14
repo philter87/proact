@@ -18,7 +18,7 @@ steps:
 - task: Cache@2
   displayName: Cache
   inputs:
-    key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**'
+    key: 'nuget | "$(Agent.OS)" | **/packages.lock.json,!**/bin/**,!**/obj/**,!Proact.Page/**/packages.lock.json'
     restoreKeys: |
       nuget | "$(Agent.OS)"
       nuget
