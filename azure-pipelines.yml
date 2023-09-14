@@ -32,6 +32,13 @@ steps:
     packagesToPack: 'Proact.Core/Proact.Core.csproj'
     packDestination: '$(Build.ArtifactStagingDirectory)'
     versioningScheme: byPrereleaseNumber
+    configuration: 'Release'
     majorVersion: '0'
     minorVersion: '1'
     patchVersion: '0'
+- task: NuGetCommand@2
+  displayName: 'NuGet push'
+  inputs:
+    command: push
+    nuGetFeedType: external
+    publishFeedCredentials: ProactNugetServiceConnection
