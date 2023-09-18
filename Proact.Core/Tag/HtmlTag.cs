@@ -52,7 +52,7 @@ public class HtmlTag : HtmlNode, IEnumerable<HtmlNode>
         return GetEnumerator();
     }
 
-    internal HtmlTag Add(string name, object? value)
+    public HtmlTag Put(string name, object? value)
     {
         if (value == null)
         {
@@ -61,10 +61,11 @@ public class HtmlTag : HtmlNode, IEnumerable<HtmlNode>
         Attributes[name] = value;
         return this;
     }
-    
-    public void Add(HtmlNode node)
+
+    public HtmlTag Add(params HtmlNode[] children)
     {
-        _children.Add(node);
+        _children.AddRange(children);
+        return this;
     }
 
     public IEnumerator<HtmlNode> GetEnumerator()

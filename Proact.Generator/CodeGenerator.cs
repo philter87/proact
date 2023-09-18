@@ -88,7 +88,7 @@ public static class Tags
 
         public string AsAddAttribute()
         {
-            return $".{nameof(HtmlTag.Add)}(\"{HtmlName}\",{FieldName})";
+            return $".{nameof(HtmlTag.Put)}(\"{HtmlName}\",{FieldName})";
         }
     }
 }

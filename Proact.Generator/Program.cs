@@ -9,5 +9,6 @@ using {typeof(HtmlNode).Namespace};
 namespace {typeof(Proact.Core.Tags).Namespace};
 
 {AddTagsClassWithStaticMethods(TagsMeta.Tags)}
+
 {AddTagClasses(TagsMeta.Tags)}
 ");

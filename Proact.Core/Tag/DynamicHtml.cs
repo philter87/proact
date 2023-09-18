@@ -21,8 +21,8 @@ public class DynamicHtml : HtmlNode
     public RenderState RenderStateValue(RenderState renderState, string? value)
     {
         var tag = _valueRender.Invoke(value, renderState.RenderContext);
-        tag.Add("data-dynamic-html-id", _dynamicHtmlId);
-        tag?.Render(renderState);
+        tag.Put("data-dynamic-html-id", _dynamicHtmlId);
+        tag.Render(renderState);
         renderState.AddDynamicHtmlTags(this);
         return renderState;
     }

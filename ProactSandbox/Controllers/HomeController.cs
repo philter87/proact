@@ -26,7 +26,8 @@ public class HomeController : Controller
 
         return html()(
             head(),
-            body()(
+            div()(),
+            body()().Add(
                 div("btn-primary")(
                     p()("Hello World!!"),
                     "Blabla",

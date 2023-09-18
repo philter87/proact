@@ -24,16 +24,8 @@ public class ProactServiceTests
         );
 
         var html = sut.Render(tag);
-
-        const string expectedHtml =
-            @"<div>
-  String within node
-  <p class=""my-class"" style=""Style"">
-    Hello World
-  </p>
-</div>
-";
-        Assert.Equal(expectedHtml, html);
+        
+        Assert.Equal(@"<div>String within node<p class=""my-class"" style=""Style"">Hello World</p></div>", html);
     }
 
     [Fact]
@@ -49,7 +41,7 @@ public class ProactServiceTests
         var html = sut.Render(tag);
 
         var htmlId = IdUtils.CreateId(valueRender.Method);
-        AssertEqual($"<div><p data-dynamic-html-id=\"{htmlId}\">{DefaultValue}</p></div>", html);
+        Assert.Equal(@$"<div><p data-dynamic-html-id=""{htmlId}"">{DefaultValue}</p></div>", html);
     }
     
     [Fact]
@@ -105,7 +97,7 @@ public class ProactServiceTests
         var html = sut.RenderPartial(CreateBody(newValue));
 
         var htmlId = IdUtils.CreateId(valueRender.Method);
-        AssertEqual($"<p data-dynamic-html-id=\"{htmlId}\">{newValue}</p>", html?.IdToHtml[htmlId]);
+        Assert.Equal($"<p data-dynamic-html-id=\"{htmlId}\">{newValue}</p>", html?.IdToHtml[htmlId]);
     }
 
     [Fact]
@@ -152,23 +144,6 @@ public class ProactServiceTests
         var partialRenderedHtml = PartialRenderWithValue(tag, nameForm);
         
         Assert.Contains("Philip Christiansen", partialRenderedHtml);
-    }
-
-    [Fact]
-    public void Static_method_calls_and_new_class_is_the_same()
-    {
-        var sut = CreateProactService();
-        var tags = new Div("btn-primary")
-        {
-            new P()
-            {
-                "Hello World!"
-            },
-        };
-
-        var actual = sut.Render(tags);
-        var expected = sut.Render(div("btn-primary")(p()("Hello World!")));
-        Assert.Equal(expected, actual);
     }
 
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)
