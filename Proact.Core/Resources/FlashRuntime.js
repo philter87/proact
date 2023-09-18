@@ -1,22 +1,22 @@
 let proactCurrentValueMap = {};
 
-async function trigger(options) {
-    if(options?.ValueMapperId) {
-        options.Value = proactCurrentValueMap[options.Id] || options.InitialValue + '';
+async function changeDynamicValue(opts) {
+    if(opts?.ValueMapperId) {
+        opts.Value = proactCurrentValueMap[opts.Id] || opts.InitialValue + '';
     }
-    let encodedString = window.btoa(JSON.stringify(options));
+    let encodedString = window.btoa(JSON.stringify(opts));
     let url = window.location.pathname + "?" + new URLSearchParams({triggerOptions: encodedString})
     let response = await fetch(url, {method: "GET", headers: {"Content-Type": "application/json"}});
     
     let jsonResult = await response.json();
     if(jsonResult?.Value) {
-        proactCurrentValueMap[options.Id] = jsonResult?.Value
+        proactCurrentValueMap[opts.Id] = jsonResult?.Value
     }
     
     for (let id of Object.keys(jsonResult.IdToHtml)){
         let elements = document.querySelectorAll('[data-dynamic-html-id="' + id + '"]')
         if(elements.length == 0){
-            console.log("The dynamic html with id '" + id + "' changed by '" + options.Id + "' was not found")
+            console.log("The dynamic html with id '" + id + "' changed by '" + opts.Id + "' was not found")
         }
         for(let e of elements){
             e.outerHTML = jsonResult.IdToHtml[id]
@@ -33,7 +33,7 @@ const proactFormSubmit = (triggerOpts, event) => {
         }
     }
     triggerOpts.Value = JSON.stringify(value);
-    trigger(triggerOpts)
+    changeDynamicValue(triggerOpts)
 }
 
 let webSocket = new WebSocket('wss://' + window.location.host + '/ws')

@@ -1,4 +1,5 @@
 ﻿using Proact.Core.Tag;
+using Proact.Core.Tag.Change;
 
 namespace Proact.Core;
 
@@ -12,7 +13,7 @@ public class ProactService
         _serviceProvider = serviceProvider;
     }
 
-    public DynamicHtmlResult? RenderPartial(TriggerOptions? triggerOptions)
+    public DynamicHtmlResult? RenderPartial(DynamicValueTriggerOptions? triggerOptions)
     {
         if (triggerOptions == null)
         {
@@ -26,15 +27,16 @@ public class ProactService
         
         var value = triggerOptions.Value;
         var dynamicValue = _dynamicValues[triggerOptions.Id];
+        var renderContext = new RenderContext(_serviceProvider);
         if (triggerOptions.ValueMapperId != null)
         {
-            value = dynamicValue.MapValue(triggerOptions.ValueMapperId, value, _serviceProvider);
+            value = dynamicValue.MapValue(triggerOptions.ValueMapperId, value, renderContext);
         }
         
         return new DynamicHtmlResult()
         {
             IdToHtml = dynamicValue.GetDynamicHtml()
-                .ToDictionary(dh => dh.GetDynamicHtmlId(), dh => dh.RenderStateValue(new RenderState(_serviceProvider), value).GetHtml()),
+                .ToDictionary(dh => dh.GetDynamicHtmlId(), dh => dh.RenderStateValue(new RenderState(renderContext), value).GetHtml()),
             Value = value,
             InitialValue = dynamicValue.InitialValue,
         };
@@ -42,7 +44,7 @@ public class ProactService
     
     public string Render(HtmlTag tag)
     {
-        var renderState = tag.Render(new RenderState(_serviceProvider));
+        var renderState = tag.Render(new RenderState(new RenderContext(_serviceProvider)));
         CacheHtmlTags(renderState);
         return renderState.GetHtml();
     }
@@ -52,7 +54,7 @@ public class ProactService
     {
         foreach (var dynamicValueKv in renderState.DynamicValues)
         {
-            _dynamicValues[dynamicValueKv.TriggerId] = dynamicValueKv;
+            _dynamicValues[dynamicValueKv.Id] = dynamicValueKv;
         }
     }
 }

@@ -43,7 +43,7 @@ public class ProactServiceTests
         var dynamicValue = DynamicValue.Create(TriggerId, DefaultValue);
         ValueRender<string> valueRender = (v, s) => p()(v);
         var tag = div()(
-            dynamicValue.On(valueRender)
+            dynamicValue.Map(valueRender)
         );
 
         var html = sut.Render(tag);
@@ -57,9 +57,9 @@ public class ProactServiceTests
     {
         var val = DynamicValue.Create(TriggerId, DefaultValue);
         
-        var html = Render(div()(val.On((v, s) => p()(v))));
-        var html1 = Render(div()(val.On((v) => p()(v))));
-        var html2 = Render(div()(val.On(() => p()(DefaultValue))));
+        var html = Render(div()(val.Map((v, s) => p()(v))));
+        var html1 = Render(div()(val.Map((v) => p()(v))));
+        var html2 = Render(div()(val.Map(() => p()(DefaultValue))));
 
         Assert.Contains(DefaultValue, html);
         Assert.Contains(DefaultValue, html1);
@@ -75,12 +75,12 @@ public class ProactServiceTests
 
         var tag = div()(
             button(onclick: dynamicValue.Set(valueMapper)),
-            dynamicValue.On((v, s) => p()(v + ""))
+            dynamicValue.Map((v, s) => p()(v + ""))
         );
 
         sut.Render(tag);
         var partialRender =
-            sut.RenderPartial(new TriggerOptions(TriggerId, "123", IdUtils.CreateId(valueMapper.Method)));
+            sut.RenderPartial(new DynamicValueTriggerOptions(TriggerId, "123", IdUtils.CreateId(valueMapper.Method)));
 
         Assert.Single(partialRender.IdToHtml);
         foreach (var kv in partialRender.IdToHtml)
@@ -96,7 +96,7 @@ public class ProactServiceTests
         var trigger = DynamicValue.Create(TriggerId, DefaultValue);
         ValueRender<string> valueRender = (v, s) => p()(v);
         var tag = div()(
-            trigger.On(valueRender)
+            trigger.Map(valueRender)
         );
         
         var newValue = "NewValue";
@@ -114,8 +114,8 @@ public class ProactServiceTests
         var sut = CreateProactService();
         var trigger = DynamicValue.Create(TriggerId, DefaultValue);
         var tag = div()(
-            trigger.On((v, s) => p()("First " + v)),
-            trigger.On((v, s) => p()("Second " + v))
+            trigger.Map((v, s) => p()("First " + v)),
+            trigger.Map((v, s) => p()("Second " + v))
         );
 
         var html = sut.Render(tag);
@@ -130,8 +130,8 @@ public class ProactServiceTests
         var sut = CreateProactService();
         var trigger = DynamicValue.Create(TriggerId, DefaultValue);
         var tag = div()(
-            trigger.On((v) => p()("First " + v)),
-            trigger.On((v) => p()("Second " + v))
+            trigger.Map((v) => p()("First " + v)),
+            trigger.Map((v) => p()("Second " + v))
         );
 
         var html = sut.Render(tag);
@@ -146,7 +146,7 @@ public class ProactServiceTests
         var signUpForm = DynamicValue.Create<NameForm>(TriggerId, null);
         var nameForm = new NameForm() { FirstName = "Philip", SecondName = "Christiansen" };
         var tag = div()(
-            signUpForm.On((v, sp) => div()(v == null ? "Nothing" : v.FirstName + " " + v.SecondName))
+            signUpForm.Map((v, sp) => div()(v == null ? "Nothing" : v.FirstName + " " + v.SecondName))
         );
 
         var partialRenderedHtml = PartialRenderWithValue(tag, nameForm);
@@ -188,9 +188,9 @@ public class ProactServiceTests
         return sut.Render(tag);
     }
 
-    private static TriggerOptions CreateBody(string newValue)
+    private static DynamicValueTriggerOptions CreateBody(string newValue)
     {
-        return new TriggerOptions(TriggerId, newValue);
+        return new DynamicValueTriggerOptions(TriggerId, newValue);
     }
 
     private static ProactService CreateProactService()

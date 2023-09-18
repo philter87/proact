@@ -1,17 +1,19 @@
 using System.Text;
+using Proact.Core.Tag.Change;
+using Proact.Core.Tag.Context;
 
 namespace Proact.Core.Tag;
 
 public class RenderState
 {
-    public IServiceProvider ServiceProvider { get; }
+    public IRenderContext RenderContext { get; }
     public List<DynamicValueObject> DynamicValues { get; }
     private readonly StringBuilder _builder = new(128);
     private string _indentation = "";
 
-    public RenderState(IServiceProvider serviceProvider)
+    public RenderState(IRenderContext renderContext)
     {
-        ServiceProvider = serviceProvider;
+        RenderContext = renderContext;
         DynamicValues = new List<DynamicValueObject>();
     }
     

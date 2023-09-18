@@ -38,11 +38,11 @@ public class ProactActionFilter : IActionFilter
         }
     }
     
-    private TriggerOptions? ParseTriggerBody(IQueryCollection query)
+    private DynamicValueTriggerOptions? ParseTriggerBody(IQueryCollection query)
     {
         byte[] data = Convert.FromBase64String(query[TriggerOptions]);
         string decodedString = System.Text.Encoding.UTF8.GetString(data);
-        return JsonSerializer.Deserialize<TriggerOptions>(decodedString, new JsonSerializerOptions()
+        return JsonSerializer.Deserialize<DynamicValueTriggerOptions>(decodedString, new JsonSerializerOptions()
         {
             PropertyNameCaseInsensitive = true
         });

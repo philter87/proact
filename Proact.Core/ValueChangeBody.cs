@@ -1,4 +1,4 @@
-﻿namespace Proact;
+﻿namespace Proact.Core;
 public class DynamicHtmlResult
 {
     public string? InitialValue { get; set; }
@@ -6,17 +6,15 @@ public class DynamicHtmlResult
     public Dictionary<string, string> IdToHtml { get; set; } = new();
 }
 
-public class TriggerOptions
+public class DynamicValueTriggerOptions
 {
-    public TriggerOptions(string id, string? value, string? valueMapperId = null)
+    public DynamicValueTriggerOptions(string id, string? value, string? valueMapperId = null)
     {
         Id = id;
         Value = value;
         ValueMapperId = valueMapperId;
     }
-
     public string Id { get; set; }
     public string? Value { get; set; }
-    
     public string? ValueMapperId { get; set; }
 }

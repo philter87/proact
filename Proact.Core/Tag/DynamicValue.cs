@@ -1,26 +1,28 @@
 ﻿using System.Text.Json;
+using Proact.Core.Tag.Change;
+using Proact.Core.Tag.Context;
 
 namespace Proact.Core.Tag;
 public delegate ValueRender<string> ValueRenderConverter<out T>(ValueRender<T> valueRender);
 public delegate ValueMapper<string> ValueMapperConverter<T>(ValueMapper<T> valueMapper);
-public delegate HtmlTag ValueRender<in T> (T? value = default, IServiceProvider? serviceProvider = null);
+public delegate HtmlTag ValueRender<in T> (T value, IRenderContext context);
 
-public delegate T ValueMapper<T>(T value, IServiceProvider? serviceProvider = null);
+public delegate T ValueMapper<T>(T value, IRenderContext context);
 
 public static class DynamicValue
 {
     public static DynamicValue<int> Create(string triggerId, int initialValue)
     {
         ValueMapperConverter<int> mapperConverter = vm => (v, sp) => vm(int.Parse(v), sp).ToString();
-        ValueRenderConverter<int> renderConverter = vr => (v, sp) => vr(int.Parse(v ?? "0"), sp);
+        ValueRenderConverter<int> renderConverter = vr => (v, sp) => vr(int.Parse(v), sp);
         return new DynamicValue<int>(triggerId, initialValue, mapperConverter, renderConverter);
     }
     
-    public static DynamicValue<T> Create<T>(string triggerId, T? initialValue)
+    public static DynamicValue<T> Create<T>(string triggerId, T initialValue)
         {
             
-            ValueMapperConverter<T> mapperConverter = vm => (v, sp) => vm(v == null ? default : JsonSerializer.Deserialize<T?>(v), sp).ToString();
-            ValueRenderConverter<T> renderConverter = vr => (v, sp) => vr(v == null ? default : JsonSerializer.Deserialize<T?>(v), sp);
+            ValueMapperConverter<T> mapperConverter = vm => (v, sp) => vm(v == null ? default : JsonSerializer.Deserialize<T>(v), sp).ToString();
+            ValueRenderConverter<T> renderConverter = vr => (v, sp) => vr(v == null ? default : JsonSerializer.Deserialize<T>(v), sp);
             return new DynamicValue<T>(triggerId, initialValue, mapperConverter, renderConverter);
         }
     
@@ -42,55 +44,62 @@ public class DynamicValue<T> : IDynamicValue<T>
         _valueMapperConverter = valueMapperConverter;
         _state = new DynamicValueObject()
         {
-            TriggerId = id,
+            Id = id,
             InitialValue = initialValue?.ToString(),
         };
     }
 
     public JavascriptCode Run()
     {
-        return new JavascriptCode($"trigger({{Id:'{_state.TriggerId}'}})");
+        return new JavascriptCode($"changeDynamicValue({{Id:'{_state.Id}'}})");
     }
     
     public JavascriptCode Set(ValueMapper<T> valueMapper)
     {
         var valueMapperId = IdUtils.CreateId(valueMapper.Method);
         _state.Add(valueMapperId, _valueMapperConverter(valueMapper));
-        return new JavascriptCode($"trigger({{Id: '{_state.TriggerId}', ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
+        return new JavascriptCode($"changeDynamicValue({{Id: '{_state.Id}', ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
+    }
+    
+    public JavascriptCode Set(Func<T, T> setter)
+    {
+        var valueMapperId = IdUtils.CreateId(setter.Method);
+        _state.Add(valueMapperId, _valueMapperConverter((v, _) => setter(v)));
+        return new JavascriptCode($"changeDynamicValue({{Id: '{_state.Id}', ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
     }
 
-    public DynamicHtml On(ValueRender<T> valueRenderGeneric)
+    public DynamicHtml Map(ValueRender<T> valueRenderGeneric)
     {
         var valueRenderId = IdUtils.CreateId(valueRenderGeneric.Method);
-        return On(valueRenderGeneric, valueRenderId);
+        return Map(valueRenderGeneric, valueRenderId);
     }
 
-    private DynamicHtml On(ValueRender<T> valueRenderGeneric, string valueRenderId)
+    public DynamicHtml Map(Func<HtmlTag> valueRender)
+    {
+        return Map((_, _) => valueRender(), IdUtils.CreateId(valueRender.Method));
+    }
+    
+    public DynamicHtml Map(Func<T, HtmlTag> valueRender)
+    {
+        return Map((v, _) => valueRender(v), IdUtils.CreateId(valueRender.Method));
+    }
+    
+    private DynamicHtml Map(ValueRender<T> valueRenderGeneric, string valueRenderId)
     {
         var valueRender = _valueRenderConverter(valueRenderGeneric);
         var dynamicHtml = new DynamicHtml(_state, valueRenderId, valueRender);
         _state.Add(valueRenderId, dynamicHtml);
         return dynamicHtml;
     }
-
-    public DynamicHtml On(Func<HtmlTag> valueRender)
-    {
-        return On((_, _) => valueRender(), IdUtils.CreateId(valueRender.Method));
-    }
-    
-    public DynamicHtml On(Func<T?, HtmlTag> valueRender)
-    {
-        return On((v, _) => valueRender(v), IdUtils.CreateId(valueRender.Method));
-    }
     
     public JavascriptCode SetFromThisValue()
     {
-        return new JavascriptCode($"trigger({{Id: '{_state.TriggerId}', 'value': this.value}})");
+        return new JavascriptCode($"changeDynamicValue({{Id: '{_state.Id}', Value: this.value}})");
     }
 
     public JavascriptCode SetOnSubmit()
     {
-        return new JavascriptCode($"proactFormSubmit({{Id: '{_state.TriggerId}'}}, event)");
+        return new JavascriptCode($"proactFormSubmit({{Id: '{_state.Id}'}}, event)");
     }
 }
 
@@ -100,35 +109,35 @@ public interface IDynamicValue<T>
     public JavascriptCode Set(ValueMapper<T> valueMapper);
     public JavascriptCode SetFromThisValue();
     public JavascriptCode SetOnSubmit();
-    public DynamicHtml On(ValueRender<T> valueRenderGeneric);
-    public DynamicHtml On(Func<HtmlTag> valueRender);
-    public DynamicHtml On(Func<T?, HtmlTag> valueRender);
+    public DynamicHtml Map(ValueRender<T> valueRenderGeneric);
+    public DynamicHtml Map(Func<HtmlTag> valueRender);
+    public DynamicHtml Map(Func<T?, HtmlTag> valueRender);
 }
 
 public class DynamicValueObject
 {
-    public string TriggerId { get; set; }
+    public string Id { get; set; }
     public string? InitialValue { get; set; }
-    private readonly Dictionary<string, ValueMapper<string>> ValueMappers = new();
-    private readonly Dictionary<string, DynamicHtml> DynamicHtmls = new();
+    private readonly Dictionary<string, ValueMapper<string>> _valueMappers = new();
+    private readonly Dictionary<string, DynamicHtml> _dynamicHtmls = new();
 
     public void Add(string id, ValueMapper<string> valueMapper)
     {
-        ValueMappers[id] = valueMapper;
+        _valueMappers[id] = valueMapper;
     }
     
     public void Add(string id, DynamicHtml dynamicHtml)
     {
-        DynamicHtmls[id] = dynamicHtml;
+        _dynamicHtmls[id] = dynamicHtml;
     }
 
     public List<DynamicHtml> GetDynamicHtml()
     {
-        return DynamicHtmls.Values.ToList();
+        return _dynamicHtmls.Values.ToList();
     }
 
-    public string MapValue(string id, string value, IServiceProvider serviceProvider)
+    public string MapValue(string id, string value, IRenderContext renderContext)
     {
-        return ValueMappers[id](value, serviceProvider);
+        return _valueMappers[id](value, renderContext);
     }
 }
