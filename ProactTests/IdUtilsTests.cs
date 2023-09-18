@@ -27,8 +27,8 @@ public class IdUtilsTests
     [Fact]
     public void CreateId1()
     {
-        Func<HtmlTag> v1 = () => Tags.p()(DateTimeOffset.Now.ToString("O"));
-        Func<HtmlTag> v2 = () => Tags.p()(DateTimeOffset.Now.ToString("T"));
+        Func<HtmlTag> v1 = () => Tags.p().With(DateTimeOffset.Now.ToString("O"));
+        Func<HtmlTag> v2 = () => Tags.p().With(DateTimeOffset.Now.ToString("T"));
 
         var hash = IdUtils.CreateId(v1.Method);
         var hash1 = IdUtils.CreateId(v2.Method);
@@ -38,6 +38,6 @@ public class IdUtilsTests
     
     private ValueMapper<int> Create()
     {
-        return (value, provider) => value + 1;
+        return (value, _) => value + 1;
     }
 }

@@ -9,9 +9,9 @@ public class TagTest
     [Fact]
     public void Pretty_render_with_pretty_is_true()
     {
-        var tag = div()(
+        var tag = div().With(
             "String within node",
-            p("my-class", style: "Style")("Hello World")
+            p("my-class", style: "Style").With("Hello World")
         );
 
         var html = tag.Render(new RenderState(Any.RenderContext, true));
@@ -28,9 +28,9 @@ public class TagTest
     [Fact]
     public void Pretty_render_with_pretty_is_false()
     {
-        var tag = div()(
+        var tag = div().With(
             "String within node",
-            p("my-class", style: "Style")("Hello World")
+            p("my-class", style: "Style").With("Hello World")
         );
 
         var html = tag.Render(new RenderState(Any.RenderContext)).GetHtml();
@@ -51,7 +51,7 @@ public class TagTest
 
         var actual = tags.Render(Any.RenderState).GetHtml();
         
-        var expected = div("btn-primary")(p()("Hello World!")).Render(Any.RenderState).GetHtml();
+        var expected = div("btn-primary").With(p().With("Hello World!")).Render(Any.RenderState).GetHtml();
         Assert.Equal(expected, actual);
     }
 }

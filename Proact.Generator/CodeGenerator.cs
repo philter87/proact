@@ -23,7 +23,17 @@ public class {tagClassName} : HtmlTag
 }}
 ";
     }
-    public static string AddTagsClassWithStaticMethods(IDictionary<string, List<string>> tags)
+    public static string AddStaticMethodsToOldTagsClass(IDictionary<string, List<string>> tags)
+    {
+        return $@"
+public static class TagsOld
+{{
+{AddStaticMethodsOld(tags)}
+}}
+";
+    }
+    
+    public static string AddStaticMethodsToTagsClass(IDictionary<string, List<string>> tags)
     {
         return $@"
 public static class Tags
@@ -33,6 +43,22 @@ public static class Tags
 ";
     }
 
+    private static string AddStaticMethodsOld(IDictionary<string, List<string>> tags)
+    {
+        return string.Join("", tags.Select(kv => AddStaticMethodOld(kv.Key, kv.Value)));
+    }
+    private static string AddStaticMethodOld(string tag, List<string> attributesShort)
+    {
+        var attributes = Convert(attributesShort);
+        
+        return $@"
+    public static {nameof(HtmlTagFunc)} {tag}({CreateParameters(attributes)})
+    {{
+        return children => new {nameof(HtmlTag)}(""{tag}"", children){AddAttributes(attributes)};
+    }}
+";
+    }
+    
     private static string AddStaticMethods(IDictionary<string, List<string>> tags)
     {
         return string.Join("", tags.Select(kv => AddStaticMethod(kv.Key, kv.Value)));
@@ -42,9 +68,9 @@ public static class Tags
         var attributes = Convert(attributesShort);
         
         return $@"
-    public static {nameof(HtmlTagFunc)} {tag}({CreateParameters(attributes)})
+    public static {nameof(HtmlTag)} {tag}({CreateParameters(attributes)})
     {{
-        return children => new {nameof(HtmlTag)}(""{tag}"", children){AddAttributes(attributes)};
+        return new {nameof(HtmlTag)}(""{tag}""){AddAttributes(attributes)};
     }}
 ";
     }
@@ -73,7 +99,7 @@ public static class Tags
         {
             var words = shorthand.Split("=");
             HtmlName = words[0];
-            FieldName = HtmlName == "class" ? "klass" : HtmlName; 
+            FieldName = HtmlName == "class" ? "classes" : HtmlName; 
             Type = words.Length == 1 ? "string" : words[1];
         }
 

@@ -8,7 +8,19 @@ using {typeof(HtmlNode).Namespace};
 
 namespace {typeof(Proact.Core.Tags).Namespace};
 
-{AddTagsClassWithStaticMethods(TagsMeta.Tags)}
+{AddStaticMethodsToTagsClass(TagsMeta.Tags)}
 
 {AddTagClasses(TagsMeta.Tags)}
 ");
+
+
+var path2 = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "OldTags.cs");
+File.WriteAllText(path2, $@"
+using {typeof(HtmlNode).Namespace};
+
+namespace {typeof(Proact.Core.Tags).Namespace}.Old;
+
+{AddStaticMethodsToOldTagsClass(TagsMeta.Tags)}
+
+");
+

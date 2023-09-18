@@ -1,7 +1,5 @@
 ﻿using System.Text.Json;
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
-using Proact;
 using Proact.Core;
 using Proact.Core.Tag;
 using static Proact.Core.Tags;
@@ -18,9 +16,9 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
 
-        var tag = div()(
+        var tag = div().With(
             "String within node",
-            p("my-class", style: "Style")("Hello World")
+            p("my-class", style: "Style").With("Hello World")
         );
 
         var html = sut.Render(tag);
@@ -33,8 +31,8 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
         var dynamicValue = DynamicValue.Create(TriggerId, DefaultValue);
-        ValueRender<string> valueRender = (v, s) => p()(v);
-        var tag = div()(
+        ValueRender<string> valueRender = (v, _) => p().With(v);
+        var tag = div().With(
             dynamicValue.Map(valueRender)
         );
 
@@ -49,9 +47,9 @@ public class ProactServiceTests
     {
         var val = DynamicValue.Create(TriggerId, DefaultValue);
         
-        var html = Render(div()(val.Map((v, s) => p()(v))));
-        var html1 = Render(div()(val.Map((v) => p()(v))));
-        var html2 = Render(div()(val.Map(() => p()(DefaultValue))));
+        var html = Render(div().With(val.Map((v, _) => p().With(v))));
+        var html1 = Render(div().With(val.Map((v) => p().With(v))));
+        var html2 = Render(div().With(val.Map(() => p().With(DefaultValue))));
 
         Assert.Contains(DefaultValue, html);
         Assert.Contains(DefaultValue, html1);
@@ -65,9 +63,9 @@ public class ProactServiceTests
         var dynamicValue = DynamicValue.Create(TriggerId, 123);
         ValueMapper<int> valueMapper = (v, _) => v + 1;
 
-        var tag = div()(
+        var tag = div().With(
             button(onclick: dynamicValue.Set(valueMapper)),
-            dynamicValue.Map((v, s) => p()(v + ""))
+            dynamicValue.Map((v, _) => p().With(v + ""))
         );
 
         sut.Render(tag);
@@ -86,8 +84,8 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
         var trigger = DynamicValue.Create(TriggerId, DefaultValue);
-        ValueRender<string> valueRender = (v, s) => p()(v);
-        var tag = div()(
+        ValueRender<string> valueRender = (v, _) => p().With(v);
+        var tag = div().With(
             trigger.Map(valueRender)
         );
         
@@ -105,9 +103,9 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
         var trigger = DynamicValue.Create(TriggerId, DefaultValue);
-        var tag = div()(
-            trigger.Map((v, s) => p()("First " + v)),
-            trigger.Map((v, s) => p()("Second " + v))
+        var tag = div().With(
+            trigger.Map((v, _) => p().With("First " + v)),
+            trigger.Map((v, _) => p().With("Second " + v))
         );
 
         var html = sut.Render(tag);
@@ -121,9 +119,9 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
         var trigger = DynamicValue.Create(TriggerId, DefaultValue);
-        var tag = div()(
-            trigger.Map((v) => p()("First " + v)),
-            trigger.Map((v) => p()("Second " + v))
+        var tag = div().With(
+            trigger.Map((v) => p().With("First " + v)),
+            trigger.Map((v) => p().With("Second " + v))
         );
 
         var html = sut.Render(tag);
@@ -137,8 +135,8 @@ public class ProactServiceTests
     {
         var signUpForm = DynamicValue.Create<NameForm>(TriggerId, null);
         var nameForm = new NameForm() { FirstName = "Philip", SecondName = "Christiansen" };
-        var tag = div()(
-            signUpForm.Map((v, sp) => div()(v == null ? "Nothing" : v.FirstName + " " + v.SecondName))
+        var tag = div().With(
+            signUpForm.Map((v, _) => div().With(v == null ? "Nothing" : v.FirstName + " " + v.SecondName))
         );
 
         var partialRenderedHtml = PartialRenderWithValue(tag, nameForm);
@@ -173,22 +171,5 @@ public class ProactServiceTests
         var serviceProvider = new ServiceCollection().BuildServiceProvider();
         ProactService sut = new ProactService(serviceProvider);
         return sut;
-    }
-
-    private void AssertEqual(string expectedString, string? html)
-    {
-        html = RemoveDoubleSpace(RemoveLineBreaks(html));
-        Assert.Equal(expectedString, html);
-    }
-
-    private static string RemoveDoubleSpace(string html)
-    {
-        const string doubleSpace = "  ";
-        return Regex.Replace(html, @doubleSpace, "");
-    }
-
-    private static string RemoveLineBreaks(string html)
-    {
-        return Regex.Replace(html, @"\r\n", "");
     }
 }

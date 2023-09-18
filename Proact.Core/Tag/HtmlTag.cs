@@ -62,7 +62,12 @@ public class HtmlTag : HtmlNode, IEnumerable<HtmlNode>
         return this;
     }
 
-    public HtmlTag Add(params HtmlNode[] children)
+    public void Add(HtmlNode child)
+    {
+        _children.Add(child);
+    }
+    
+    public HtmlTag With(params HtmlNode[] children)
     {
         _children.AddRange(children);
         return this;
