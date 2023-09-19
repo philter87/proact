@@ -1,5 +1,5 @@
 ﻿using Proact.Core.Tag;
-using Proact.Core.Tag.Change;
+using Proact.Core.Tag.Context;
 
 namespace Proact.Core;
 
@@ -38,9 +38,10 @@ public class ProactService
             IdToHtml = dynamicValue.GetDynamicHtml()
                 .ToDictionary(dh => dh.GetDynamicHtmlId(), dh =>
                 {
-                    var renderState = dh.RenderStateValue(new RenderState(renderContext), value); 
-                    CacheHtmlTags(renderState);
-                    return renderState.GetHtml();
+                    renderContext.ClearHtml();
+                    dh.RenderStateValue(renderContext, value); 
+                    CacheHtmlTags(renderContext);
+                    return renderContext.GetHtml();
                 }),
             Value = value,
             InitialValue = dynamicValue.InitialValue,
@@ -49,17 +50,18 @@ public class ProactService
     
     public string Render(HtmlTag tag)
     {
-        var renderState = tag.Render(new RenderState(new RenderContext(_serviceProvider)));
-        CacheHtmlTags(renderState);
-        return renderState.GetHtml();
+        var renderContext = tag.Render(new RenderContext(_serviceProvider));
+        CacheHtmlTags(renderContext);
+        return renderContext.GetHtml();
     }
 
 
-    private void CacheHtmlTags(RenderState renderState)
+    private void CacheHtmlTags(RenderContext renderState)
     {
-        foreach (var dynamicValueKv in renderState.DynamicValues)
+        
+        foreach (var dynamicValue in renderState.GetValues())
         {
-            _dynamicValues[dynamicValueKv.Id] = dynamicValueKv;
+            _dynamicValues[dynamicValue.Id] = dynamicValue;
         }
     }
 }

@@ -14,7 +14,7 @@ public class TagTest
             p("my-class", style: "Style").With("Hello World")
         );
 
-        var html = tag.Render(new RenderState(Any.RenderContext)).GetHtml();
+        var html = tag.Render(Any.RenderContext).GetHtml();
         
         Assert.Equal(@"<div>String within node<p class=""my-class"" style=""Style"">Hello World</p></div>", html);
     }
@@ -30,9 +30,9 @@ public class TagTest
             },
         };
 
-        var actual = tags.Render(Any.RenderState).GetHtml();
+        var actual = tags.Render(Any.RenderContext).GetHtml();
         
-        var expected = div("btn-primary").With(p().With("Hello World!")).Render(Any.RenderState).GetHtml();
+        var expected = div("btn-primary").With(p().With("Hello World!")).Render(Any.RenderContext).GetHtml();
         Assert.Equal(expected, actual);
     }
 }

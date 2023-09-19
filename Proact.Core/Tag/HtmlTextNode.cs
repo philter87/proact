@@ -1,4 +1,6 @@
-﻿namespace Proact.Core.Tag;
+﻿using Proact.Core.Tag.Context;
+
+namespace Proact.Core.Tag;
 
 public class HtmlTextNode : HtmlNode
 {
@@ -9,8 +11,8 @@ public class HtmlTextNode : HtmlNode
         _rawContent = rawContent;
     }
 
-    public override RenderState Render(RenderState renderState)
+    public override RenderContext Render(RenderContext renderContext)
     {
-        return renderState.AddLine(_rawContent);
+        return renderContext.AddLine(_rawContent);
     }
 }

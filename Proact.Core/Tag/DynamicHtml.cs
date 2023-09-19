@@ -1,4 +1,6 @@
-﻿namespace Proact.Core.Tag;
+﻿using Proact.Core.Tag.Context;
+
+namespace Proact.Core.Tag;
 
 public class DynamicHtml : HtmlNode
 {
@@ -13,23 +15,18 @@ public class DynamicHtml : HtmlNode
         _valueRender = valueRender;
     }
 
-    public override RenderState Render(RenderState renderState)
+    public override RenderContext Render(RenderContext renderContext)
     {
-        return RenderStateValue(renderState, _dynamicValue.InitialValue);
+        return RenderStateValue(renderContext, _dynamicValue.InitialValue);
     }
     
-    public RenderState RenderStateValue(RenderState renderState, string? value)
+    public RenderContext RenderStateValue(RenderContext renderContext, string? value)
     {
-        var tag = _valueRender.Invoke(value, renderState.RenderContext);
+        var tag = _valueRender.Invoke(value, renderContext);
         tag.Put("data-dynamic-html-id", _dynamicHtmlId);
-        tag.Render(renderState);
-        renderState.AddDynamicHtmlTags(this);
-        return renderState;
-    }
-
-    public string GetValueId()
-    {
-        return _dynamicValue.Id;
+        tag.Render(renderContext);
+        renderContext.AddDynamicHtmlTags(this);
+        return renderContext;
     }
 
     public DynamicValueObject GetValue()
