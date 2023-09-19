@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Proact.Core;
 using Proact.Core.Tag;
 using Proact.Core.Tag.Context;
 
@@ -8,5 +9,8 @@ public static class Any
 {
     public static IServiceProvider ServiceProvider => new ServiceCollection().BuildServiceProvider();
     public static RenderContext RenderContext => new RenderContext(ServiceProvider);
+    public static RenderContext RenderContextWith(string id, string? value, string? valueMapperId = null) => new(ServiceProvider, new DynamicValueTriggerOptions(id, value, valueMapperId));
     public static RenderState RenderState => new();
+    
+    
 }

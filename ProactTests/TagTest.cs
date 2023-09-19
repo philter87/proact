@@ -1,5 +1,4 @@
 ﻿using Proact.Core;
-using Proact.Core.Tag;
 using static Proact.Core.Tags;
 
 namespace ProactTests;

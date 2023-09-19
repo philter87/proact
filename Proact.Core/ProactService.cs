@@ -13,8 +13,9 @@ public class ProactService
         _serviceProvider = serviceProvider;
     }
 
-    public DynamicHtmlResult? RenderPartial(DynamicValueTriggerOptions? triggerOptions)
+    public DynamicHtmlResult? RenderPartial(RenderContext renderContext)
     {
+        var triggerOptions = renderContext.TriggerOptions;
         if (triggerOptions == null)
         {
             return null;
@@ -27,7 +28,6 @@ public class ProactService
         
         var value = triggerOptions.Value;
         var dynamicValue = _dynamicValues[triggerOptions.Id];
-        var renderContext = new RenderContext(_serviceProvider);
         if (triggerOptions.ValueMapperId != null)
         {
             value = dynamicValue.MapValue(triggerOptions.ValueMapperId, value, renderContext);

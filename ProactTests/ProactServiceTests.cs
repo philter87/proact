@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Proact.Core;
 using Proact.Core.Tag;
+using Proact.Core.Tag.Context;
 using static Proact.Core.Tags;
 
 namespace ProactTests;
@@ -69,8 +70,7 @@ public class ProactServiceTests
         );
 
         sut.Render(tag);
-        var partialRender =
-            sut.RenderPartial(new DynamicValueTriggerOptions(TriggerId, "123", IdUtils.CreateId(valueMapper.Method)));
+        var partialRender = sut.RenderPartial(Any.RenderContextWith(TriggerId, "123", IdUtils.CreateId(valueMapper.Method)));
 
         Assert.Single(partialRender.IdToHtml);
         foreach (var kv in partialRender.IdToHtml)
@@ -78,6 +78,7 @@ public class ProactServiceTests
             Assert.Contains("124", kv.Value);
         }
     }
+    
 
     [Fact]
     public void Render_with_trigger_partial_render()
@@ -153,7 +154,7 @@ public class ProactServiceTests
         var sut = CreateProactService();
 
         sut.Render(tag);
-        var result = sut.RenderPartial(new DynamicValueTriggerOptions("condition", "false"));
+        var result = sut.RenderPartial(Any.RenderContextWith("condition", "false"));
 
         var newHtml = result.IdToHtml.First().Value;
         Assert.Contains("23423", newHtml);
@@ -168,8 +169,9 @@ public class ProactServiceTests
         var sut = CreateProactService();
 
         sut.Render(tag);
-        sut.RenderPartial(new DynamicValueTriggerOptions("condition", "false"));
-        var result = sut.RenderPartial(new DynamicValueTriggerOptions("nestedValue", "5646987"));
+        sut.RenderPartial(Any.RenderContextWith("condition", "false"));
+
+        var result = sut.RenderPartial(Any.RenderContextWith("nestedValue", "5646987"));
 
         var newHtml = result.IdToHtml.First().Value;
         Assert.Contains("5646987", newHtml);
@@ -192,9 +194,9 @@ public class ProactServiceTests
         return sut.Render(tag);
     }
 
-    private static DynamicValueTriggerOptions CreateBody(string newValue)
+    private static RenderContext CreateBody(string newValue)
     {
-        return new DynamicValueTriggerOptions(TriggerId, newValue);
+        return Any.RenderContextWith(TriggerId, newValue);
     }
 
     private static ProactService CreateProactService()

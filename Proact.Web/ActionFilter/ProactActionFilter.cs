@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Proact.Core;
 using Proact.Core.Tag;
+using Proact.Core.Tag.Context;
 
 namespace Proact.ActionFilter;
 
@@ -11,10 +12,12 @@ public class ProactActionFilter : IActionFilter
 {
     private const string TriggerOptions = "triggerOptions";
     private readonly ProactService _proactService;
+    private readonly IServiceProvider _serviceProvider;
 
-    public ProactActionFilter(ProactService proactService)
+    public ProactActionFilter(ProactService proactService, IServiceProvider serviceProvider)
     {
         _proactService = proactService;
+        _serviceProvider = serviceProvider;
     }
 
     public void OnActionExecuting(ActionExecutingContext context)
@@ -24,9 +27,9 @@ public class ProactActionFilter : IActionFilter
         {
             return;
         }
-
-        var triggerBody = ParseTriggerBody(query);
-        context.Result = JsonResult(_proactService.RenderPartial(triggerBody));
+        
+        var renderContext = new RenderContext(_serviceProvider, ParseTriggerBody(query));
+        context.Result = JsonResult(_proactService.RenderPartial(renderContext));
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
