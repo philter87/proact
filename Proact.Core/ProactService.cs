@@ -36,7 +36,12 @@ public class ProactService
         return new DynamicHtmlResult()
         {
             IdToHtml = dynamicValue.GetDynamicHtml()
-                .ToDictionary(dh => dh.GetDynamicHtmlId(), dh => dh.RenderStateValue(new RenderState(renderContext), value).GetHtml()),
+                .ToDictionary(dh => dh.GetDynamicHtmlId(), dh =>
+                {
+                    var renderState = dh.RenderStateValue(new RenderState(renderContext), value); 
+                    CacheHtmlTags(renderState);
+                    return renderState.GetHtml();
+                }),
             Value = value,
             InitialValue = dynamicValue.InitialValue,
         };

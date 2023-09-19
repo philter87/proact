@@ -169,10 +169,10 @@ public class ProactServiceTests
 
         sut.Render(tag);
         sut.RenderPartial(new DynamicValueTriggerOptions("condition", "false"));
-        var result = sut.RenderPartial(new DynamicValueTriggerOptions("nestedValue", "5646987351"));
+        var result = sut.RenderPartial(new DynamicValueTriggerOptions("nestedValue", "5646987"));
 
         var newHtml = result.IdToHtml.First().Value;
-        Assert.Contains("5646987351", newHtml);
+        Assert.Contains("5646987", newHtml);
     }
 
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)
