@@ -10,6 +10,7 @@ public static class TagsMeta
         {"head", CreateAttributes()},
         {"body", CreateAttributes()},
         {"p", CreateAttributes()},
+        {"a", CreateAttributes("href")},
         {"span", CreateAttributes()},
         {"div", CreateAttributes()},
         {"h1", CreateAttributes()},

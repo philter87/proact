@@ -143,6 +143,37 @@ public class ProactServiceTests
         
         Assert.Contains("Philip Christiansen", partialRenderedHtml);
     }
+    
+    [Fact]
+    public void Render_with_nested_dynamic_values()
+    {
+        var condition = DynamicValue.Create("condition", true);
+        var nestedValue = DynamicValue.Create("nestedValue", 23423);
+        var tag = div().With(condition.Map(v => v ? span().With("This is rendered first") : span().With(nestedValue)));
+        var sut = CreateProactService();
+
+        sut.Render(tag);
+        var result = sut.RenderPartial(new DynamicValueTriggerOptions("condition", "false"));
+
+        var newHtml = result.IdToHtml.First().Value;
+        Assert.Contains("23423", newHtml);
+    }
+    
+    [Fact]
+    public void Render_with_nested_dynamic_value_which_that_change()
+    {
+        var condition = DynamicValue.Create("condition", true);
+        var nestedValue = DynamicValue.Create("nestedValue", 23423);
+        var tag = div().With(condition.Map(v => v ? span().With("This is rendered first") : span().With(nestedValue)));
+        var sut = CreateProactService();
+
+        sut.Render(tag);
+        sut.RenderPartial(new DynamicValueTriggerOptions("condition", "false"));
+        var result = sut.RenderPartial(new DynamicValueTriggerOptions("nestedValue", "5646987351"));
+
+        var newHtml = result.IdToHtml.First().Value;
+        Assert.Contains("5646987351", newHtml);
+    }
 
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)
     {

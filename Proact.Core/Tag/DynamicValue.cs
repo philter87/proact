@@ -18,6 +18,13 @@ public static class DynamicValue
         return new DynamicValue<int>(triggerId, initialValue, mapperConverter, renderConverter);
     }
     
+    public static DynamicValue<bool> Create(string triggerId, bool initialValue)
+    {
+        ValueMapperConverter<bool> mapperConverter = vm => (v, sp) => vm(bool.Parse(v), sp).ToString();
+        ValueRenderConverter<bool> renderConverter = vr => (v, sp) => vr(bool.Parse(v), sp);
+        return new DynamicValue<bool>(triggerId, initialValue, mapperConverter, renderConverter);
+    }
+    
     public static DynamicValue<T> Create<T>(string triggerId, T initialValue)
         {
             
