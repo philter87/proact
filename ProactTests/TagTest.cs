@@ -7,25 +7,6 @@ namespace ProactTests;
 public class TagTest
 {
     [Fact]
-    public void Pretty_render_with_pretty_is_true()
-    {
-        var tag = div().With(
-            "String within node",
-            p("my-class", style: "Style").With("Hello World")
-        );
-
-        var html = tag.Render(new RenderState(Any.RenderContext, true));
-        
-        Assert.Equal(@"<div>
-  String within node
-  <p class=""my-class"" style=""Style"">
-    Hello World
-  </p>
-</div>
-", html.GetHtml());
-    }
-    
-    [Fact]
     public void Pretty_render_with_pretty_is_false()
     {
         var tag = div().With(

@@ -18,12 +18,9 @@ public class HtmlTag : HtmlNode, IEnumerable<HtmlNode>
     public override RenderState Render(RenderState renderState)
     {
         renderState.AddLine($"<{_tag}{CreateAttributes()}>");
-        renderState.LevelIncrement();
         _children.ForEach(childElement => childElement.Render(renderState));
         
         AddScriptsEndOfBody(renderState);
-        
-        renderState.LevelDecrement();
         renderState.AddLine($"</{_tag}>");
         return renderState;
     }
