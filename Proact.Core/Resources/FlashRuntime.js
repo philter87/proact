@@ -4,9 +4,8 @@ async function changeDynamicValue(opts) {
     if(opts?.ValueMapperId) {
         opts.Value = proactCurrentValueMap[opts.Id] || opts.InitialValue + '';
     }
-    let encodedString = window.btoa(JSON.stringify(opts));
-    let url = window.location.pathname + "?" + new URLSearchParams({triggerOptions: encodedString})
-    let response = await fetch(url, {method: "GET", headers: {"Content-Type": "application/json"}});
+    let url = window.location.pathname + "?" + new URLSearchParams({ValueChangeRequest: 'true'});
+    let response = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(opts)});
     
     let jsonResult = await response.json();
     if(jsonResult?.Value) {

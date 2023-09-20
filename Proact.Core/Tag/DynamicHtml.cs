@@ -17,10 +17,15 @@ public class DynamicHtml : HtmlNode
 
     public override RenderContext Render(RenderContext renderContext)
     {
+        var triggerOptions = renderContext.GetTriggerOptions(_dynamicValue);
+        if (triggerOptions != null)
+        {
+            return RenderStateValue(renderContext, triggerOptions.Value);            
+        }
         return RenderStateValue(renderContext, _dynamicValue.InitialValue);
     }
     
-    public RenderContext RenderStateValue(RenderContext renderContext, string? value)
+    private RenderContext RenderStateValue(RenderContext renderContext, string? value)
     {
         var tag = _valueRender.Invoke(value, renderContext);
         tag.Put("data-dynamic-html-id", _dynamicHtmlId);

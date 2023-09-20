@@ -43,7 +43,8 @@ public class DynamicValue<T> : IDynamicValue<T>
     private readonly ValueRenderConverter<T> _valueRenderConverter;
     private readonly ValueMapperConverter<T> _valueMapperConverter;
     private readonly DynamicValueObject _state;
-    
+    public string Id => _state.Id;
+
     public DynamicValue(string id, T initialValue, ValueMapperConverter<T> valueMapperConverter, ValueRenderConverter<T> valueRenderConverter)
     {
         _valueRenderConverter = valueRenderConverter;
@@ -111,6 +112,7 @@ public class DynamicValue<T> : IDynamicValue<T>
 
 public interface IDynamicValue<T>
 {
+    public string Id { get; }
     public JavascriptCode Run();
     public JavascriptCode Set(ValueMapper<T> valueMapper);
     public JavascriptCode SetFromThisValue();

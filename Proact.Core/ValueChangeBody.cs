@@ -6,9 +6,9 @@ public class DynamicHtmlResult
     public Dictionary<string, string> IdToHtml { get; set; } = new();
 }
 
-public class DynamicValueTriggerOptions
+public class ValueChange
 {
-    public DynamicValueTriggerOptions(string id, string? value, string? valueMapperId = null)
+    public ValueChange(string id, string? value, string? valueMapperId = null)
     {
         Id = id;
         Value = value;

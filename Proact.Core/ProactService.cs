@@ -15,22 +15,24 @@ public class ProactService
 
     public DynamicHtmlResult? RenderPartial(RenderContext renderContext)
     {
-        var triggerOptions = renderContext.TriggerOptions;
-        if (triggerOptions == null)
+        var triggerOptionsMap = renderContext.ValueChanges;
+
+        if (triggerOptionsMap.Count == 0)
         {
             return null;
         }
+
+        var triggerOptions = triggerOptionsMap.First().Value;
 
         if (!_dynamicValues.ContainsKey(triggerOptions.Id))
         {
             return null;
         }
         
-        var value = triggerOptions.Value;
         var dynamicValue = _dynamicValues[triggerOptions.Id];
         if (triggerOptions.ValueMapperId != null)
         {
-            value = dynamicValue.MapValue(triggerOptions.ValueMapperId, value, renderContext);
+            triggerOptions.Value = dynamicValue.MapValue(triggerOptions.ValueMapperId, triggerOptions.Value, renderContext);
         }
         
         return new DynamicHtmlResult()
@@ -39,18 +41,18 @@ public class ProactService
                 .ToDictionary(dh => dh.GetDynamicHtmlId(), dh =>
                 {
                     renderContext.ClearHtml();
-                    dh.RenderStateValue(renderContext, value); 
+                    dh.Render(renderContext); 
                     CacheHtmlTags(renderContext);
                     return renderContext.GetHtml();
                 }),
-            Value = value,
+            Value = triggerOptions.Value,
             InitialValue = dynamicValue.InitialValue,
         };
     }
     
-    public string Render(HtmlTag tag)
+    public string Render(HtmlTag tag, RenderContext? renderContext = null)
     {
-        var renderContext = tag.Render(new RenderContext(_serviceProvider));
+        renderContext ??= tag.Render(new RenderContext(_serviceProvider));
         CacheHtmlTags(renderContext);
         return renderContext.GetHtml();
     }

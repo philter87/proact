@@ -5,13 +5,28 @@ public class RenderContext : IRenderContext
     private readonly List<DynamicValueObject> _dynamicValues = new();
     private readonly IServiceProvider _serviceProvider;
     private RenderState _renderState;
-    public DynamicValueTriggerOptions? TriggerOptions { get; set; }
+    public string UrlPath { get; set; }
+    public Dictionary<string, ValueChange> ValueChanges { get; } = new();
 
-    public RenderContext(IServiceProvider serviceProvider, DynamicValueTriggerOptions? triggerOptions = null)
+    public RenderContext(IServiceProvider serviceProvider, ValueChange? valueChange = null)
     {
         _serviceProvider = serviceProvider;
         _renderState = new RenderState();
-        TriggerOptions = triggerOptions;
+        AddTrigger(valueChange);
+    }
+
+    private void AddTrigger(ValueChange? triggerOptions)
+    {
+        if (triggerOptions == null)
+        {
+            return;
+        }
+        ValueChanges[triggerOptions.Id] = triggerOptions;
+    }
+
+    public ValueChange? GetTriggerOptions(DynamicValueObject dynamicValueObject)
+    {
+        return ValueChanges.GetValueOrDefault(dynamicValueObject.Id);
     }
 
     public S? GetService<S>() where S: class

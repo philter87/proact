@@ -10,7 +10,7 @@ namespace Proact.ActionFilter;
 
 public class ProactActionFilter : IActionFilter
 {
-    private const string TriggerOptions = "triggerOptions";
+    private const string ValueChangeRequest = "ValueChangeRequest";
     private readonly ProactService _proactService;
     private readonly IServiceProvider _serviceProvider;
 
@@ -22,14 +22,14 @@ public class ProactActionFilter : IActionFilter
 
     public void OnActionExecuting(ActionExecutingContext context)
     {
-        var query = context.HttpContext.Request.Query;
-        if (!query.ContainsKey(TriggerOptions))
+        if (context.HttpContext.Request.Method != "POST" && !context.HttpContext.Request.Query.ContainsKey(ValueChangeRequest))
         {
             return;
         }
         
-        var renderContext = new RenderContext(_serviceProvider, ParseTriggerBody(query));
-        context.Result = JsonResult(_proactService.RenderPartial(renderContext));
+        var renderContext = new RenderContext(_serviceProvider, ParseTriggerBody(context.HttpContext.Request.Body).Result);
+        var jsonResult = _proactService.RenderPartial(renderContext);
+        context.Result = JsonResult(jsonResult);
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
@@ -37,16 +37,17 @@ public class ProactActionFilter : IActionFilter
         // The context is forwarded to the flashService which is a singleton an able to cache results
         if (context.Result is ObjectResult { Value: HtmlTag tag })
         {
-            var html = _proactService.Render(tag);
+            var html = _proactService.Render(tag, tag.Render(new RenderContext(_serviceProvider)));
             context.Result = HtmlResult(html);
         }
     }
     
-    private DynamicValueTriggerOptions? ParseTriggerBody(IQueryCollection query)
+    private static async Task<ValueChange?> ParseTriggerBody(Stream stream)
     {
-        byte[] data = Convert.FromBase64String(query[TriggerOptions]);
-        string decodedString = System.Text.Encoding.UTF8.GetString(data);
-        return JsonSerializer.Deserialize<DynamicValueTriggerOptions>(decodedString, new JsonSerializerOptions()
+        var reader = new StreamReader(stream);
+        var rawMessage = await reader.ReadToEndAsync();
+        
+        return JsonSerializer.Deserialize<ValueChange>(rawMessage, new JsonSerializerOptions()
         {
             PropertyNameCaseInsensitive = true
         });

@@ -6,10 +6,9 @@ using static Proact.Core.Tags;
 namespace ProactSandbox.Controllers;
 
 [ApiController]
-[Route("[controller]")]
 public class HomeController : Controller
 {
-    [HttpGet]
+    [Route("/")]
     public HtmlNode Get()
     {
         var form = DynamicValue.Create<SignUpForm?>("formSubmitted", null);
