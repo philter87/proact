@@ -37,7 +37,9 @@ public class ProactActionFilter : IActionFilter
         // The context is forwarded to the flashService which is a singleton an able to cache results
         if (context.Result is ObjectResult { Value: HtmlTag tag })
         {
-            var html = _proactService.Render(tag, tag.Render(new RenderContext(_serviceProvider)));
+            var renderContext = new RenderContext(_serviceProvider);
+            renderContext.UrlPath = context.HttpContext.Request.Path;
+            var html = _proactService.Render(tag, tag.Render(renderContext));
             context.Result = HtmlResult(html);
         }
     }

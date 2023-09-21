@@ -1,14 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Proact.Core;
 using Proact.Core.Tag;
+using static Proact.Core.ProactTags;
 using static Proact.Core.Tags;
+using Route = Proact.Core.Tag.Route;
 
 namespace ProactSandbox.Controllers;
 
 [ApiController]
 public class HomeController : Controller
 {
-    [Route("/")]
+    [Route("/{*AnyPath}")]
     public HtmlNode Get()
     {
         var form = DynamicValue.Create<SignUpForm?>("formSubmitted", null);
@@ -48,7 +50,18 @@ public class HomeController : Controller
                         new Input(type:"text", name:nameof(SignUpForm.SecondName)),
                         new Input(type:"submit", value: "Submit")
                     },
-                    form.Map(v => v == null ? div().With("Empty") : div().With(v.FirstName + " " + v.SecondName))
+                    form.Map(v => v == null ? div().With("Empty") : div().With(v.FirstName + " " + v.SecondName)),
+                    Routes.Create(
+                        new Route("/", div().With("Home")),
+                        new Route("/about", div().With("About")),
+                        new Route("/contact", div().With("Contact"))
+                        ),
+                    div().With(
+                        h1().With("Links"),
+                        Link(href: "/").With("Home"),
+                        Link(href: "/about").With("About"),
+                        Link(href: "/contact").With("Contact")
+                        )
                 )
             )
         );
