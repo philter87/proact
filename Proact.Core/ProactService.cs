@@ -37,14 +37,14 @@ public class ProactService
         
         return new DynamicHtmlResult()
         {
-            IdToHtml = dynamicValue.GetDynamicHtml()
-                .ToDictionary(dh => dh.GetDynamicHtmlId(), dh =>
+            HtmlChanges = dynamicValue.GetDynamicHtml()
+                .Select(dh =>
                 {
                     renderContext.ClearHtml();
                     dh.Render(renderContext); 
                     CacheHtmlTags(renderContext);
-                    return renderContext.GetHtml();
-                }),
+                    return new HtmlChange(dh.GetDynamicHtmlId(), renderContext.GetHtml());
+                }).ToList(),
             Value = triggerOptions.Value,
             InitialValue = dynamicValue.InitialValue,
         };

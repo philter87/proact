@@ -3,7 +3,23 @@ public class DynamicHtmlResult
 {
     public string? InitialValue { get; set; }
     public object? Value { get; set; }
-    public Dictionary<string, string> IdToHtml { get; set; } = new();
+    public List<HtmlChange> HtmlChanges { get; set; } = new();
+}
+
+public class HtmlChange
+{
+    public HtmlChange()
+    {
+    }
+
+    public HtmlChange(string id, string html)
+    {
+        Id = id;
+        Html = html;
+    }
+
+    public string Id { get; set; } = "";
+    public string Html { get; set; } = "";
 }
 
 public class ValueChange

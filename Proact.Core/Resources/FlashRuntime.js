@@ -1,25 +1,28 @@
 let proactCurrentValueMap = {};
 
 async function changeDynamicValue(id, value, opts) {
-    if(opts?.ValueMapperId) {
+    if (opts?.ValueMapperId) {
         value = proactCurrentValueMap[id] || opts.InitialValue + '';
     }
-    let valueChangeRequest = { ...opts, Id: id, Value: value}
+    let valueChangeRequest = {...opts, Id: id, Value: value}
     let url = window.location.pathname + "?" + new URLSearchParams({ValueChangeRequest: 'true'});
-    let response = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(valueChangeRequest)});
-    
+    let response = await fetch(url, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(valueChangeRequest)
+    });
+
     let jsonResult = await response.json();
-    if(jsonResult?.Value) {
+    if (jsonResult?.Value) {
         proactCurrentValueMap[id] = jsonResult?.Value
     }
-    
-    for (let htmlId of Object.keys(jsonResult.IdToHtml)){
-        let elements = document.querySelectorAll('[data-dynamic-html-id="' + htmlId + '"]')
-        if(elements.length === 0){
-            console.log("The dynamic html with id '" + htmlId + "' changed by '" + id + "' was not found")
+    for (let htmlChange of jsonResult.HtmlChanges) {
+        let elements = document.querySelectorAll('[data-dynamic-html-id="' + htmlChange.Id + '"]')
+        if (elements.length === 0) {
+            console.log("The dynamic html with id '" + htmlChange.Id + "' changed by '" + id + "' was not found")
         }
-        for(let e of elements){
-            e.outerHTML = jsonResult.IdToHtml[htmlId]
+        for (let e of elements) {
+            e.outerHTML = htmlChange.Html;
         }
     }
 }

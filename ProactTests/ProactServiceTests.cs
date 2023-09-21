@@ -72,10 +72,10 @@ public class ProactServiceTests
         sut.Render(tag);
         var partialRender = sut.RenderPartial(Any.RenderContextWith(TriggerId, "123", IdUtils.CreateId(valueMapper.Method)));
 
-        Assert.Single(partialRender.IdToHtml);
-        foreach (var kv in partialRender.IdToHtml)
+        Assert.Single(partialRender.HtmlChanges);
+        foreach (var kv in partialRender.HtmlChanges)
         {
-            Assert.Contains("124", kv.Value);
+            Assert.Contains("124", kv.Html);
         }
     }
     
@@ -96,7 +96,7 @@ public class ProactServiceTests
         var html = sut.RenderPartial(CreateBody(newValue));
 
         var htmlId = IdUtils.CreateId(valueRender.Method);
-        Assert.Equal($"<p data-dynamic-html-id=\"{htmlId}\">{newValue}</p>", html?.IdToHtml[htmlId]);
+        Assert.Equal($"<p data-dynamic-html-id=\"{htmlId}\">{newValue}</p>", html?.HtmlChanges[0].Html);
     }
 
     [Fact]
@@ -155,9 +155,8 @@ public class ProactServiceTests
 
         sut.Render(tag);
         var result = sut.RenderPartial(Any.RenderContextWith("condition", "false"));
-
-        var newHtml = result.IdToHtml.First().Value;
-        Assert.Contains("23423", newHtml);
+        
+        Assert.Contains("23423", result.HtmlChanges[0].Html);
     }
     
     [Fact]
@@ -172,9 +171,8 @@ public class ProactServiceTests
         sut.RenderPartial(Any.RenderContextWith("condition", "false"));
 
         var result = sut.RenderPartial(Any.RenderContextWith("nestedValue", "5646987"));
-
-        var newHtml = result.IdToHtml.First().Value;
-        Assert.Contains("5646987", newHtml);
+        
+        Assert.Contains("5646987", result.HtmlChanges[0].Html);
     }
 
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)
@@ -185,7 +183,7 @@ public class ProactServiceTests
         sut.Render(tag);
         var partialRender = sut.RenderPartial(CreateBody(valueAsString));
 
-        return partialRender.IdToHtml.Values.ToList()[0];
+        return partialRender.HtmlChanges[0].Html;
     }
 
     private string Render(HtmlTag tag)
