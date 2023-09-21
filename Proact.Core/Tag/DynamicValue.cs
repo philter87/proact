@@ -58,21 +58,21 @@ public class DynamicValue<T> : IDynamicValue<T>
 
     public JavascriptCode Run()
     {
-        return new JavascriptCode($"changeDynamicValue({{Id:'{_state.Id}'}})");
+        return new JavascriptCode($"changeDynamicValue('{_state.Id}')");
     }
     
     public JavascriptCode Set(ValueMapper<T> valueMapper)
     {
         var valueMapperId = IdUtils.CreateId(valueMapper.Method);
         _state.Add(valueMapperId, _valueMapperConverter(valueMapper));
-        return new JavascriptCode($"changeDynamicValue({{Id: '{_state.Id}', ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
+        return new JavascriptCode($"changeDynamicValue('{_state.Id}', undefined, {{ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
     }
     
     public JavascriptCode Set(Func<T, T> setter)
     {
         var valueMapperId = IdUtils.CreateId(setter.Method);
         _state.Add(valueMapperId, _valueMapperConverter((v, _) => setter(v)));
-        return new JavascriptCode($"changeDynamicValue({{Id: '{_state.Id}', ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
+        return new JavascriptCode($"changeDynamicValue('{_state.Id}', undefined, {{ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
     }
 
     public DynamicHtml Map(ValueRender<T> valueRenderGeneric)
@@ -101,12 +101,12 @@ public class DynamicValue<T> : IDynamicValue<T>
     
     public JavascriptCode SetFromThisValue()
     {
-        return new JavascriptCode($"changeDynamicValue({{Id: '{_state.Id}', Value: this.value}})");
+        return new JavascriptCode($"changeDynamicValue('{_state.Id}', this.value)");
     }
 
     public JavascriptCode SetOnSubmit()
     {
-        return new JavascriptCode($"proactFormSubmit({{Id: '{_state.Id}'}}, event)");
+        return new JavascriptCode($"proactFormSubmit('{_state.Id}', event)");
     }
 }
 

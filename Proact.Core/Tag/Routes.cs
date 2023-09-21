@@ -15,7 +15,14 @@ public static class Routes
 
     private static HtmlTag FindMatchingRoute(Route[] routes, string value, IRenderContext c)
     {
-        value = value == DefaultPathToBeIgnored ? c.UrlPath : value;
-        return routes.First(r => r.Path == value).Tag;
+        Console.WriteLine(value + " " +  c.UrlPath);
+        value = IsFirstRender(value) ? c.UrlPath : value;
+        var route = routes.FirstOrDefault(r => r.Path == value); 
+        return route == null ? routes[0].Tag : route.Tag;
+    }
+
+    private static bool IsFirstRender(string value)
+    {
+        return value == DefaultPathToBeIgnored;
     }
 }

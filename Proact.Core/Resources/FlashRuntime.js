@@ -1,41 +1,42 @@
 let proactCurrentValueMap = {};
 
-async function changeDynamicValue(opts) {
+async function changeDynamicValue(id, value, opts) {
     if(opts?.ValueMapperId) {
-        opts.Value = proactCurrentValueMap[opts.Id] || opts.InitialValue + '';
+        value = proactCurrentValueMap[id] || opts.InitialValue + '';
     }
+    let valueChangeRequest = { ...opts, Id: id, Value: value}
     let url = window.location.pathname + "?" + new URLSearchParams({ValueChangeRequest: 'true'});
-    let response = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(opts)});
+    let response = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(valueChangeRequest)});
     
     let jsonResult = await response.json();
     if(jsonResult?.Value) {
-        proactCurrentValueMap[opts.Id] = jsonResult?.Value
+        proactCurrentValueMap[id] = jsonResult?.Value
     }
     
-    for (let id of Object.keys(jsonResult.IdToHtml)){
-        let elements = document.querySelectorAll('[data-dynamic-html-id="' + id + '"]')
-        if(elements.length == 0){
-            console.log("The dynamic html with id '" + id + "' changed by '" + opts.Id + "' was not found")
+    for (let htmlId of Object.keys(jsonResult.IdToHtml)){
+        let elements = document.querySelectorAll('[data-dynamic-html-id="' + htmlId + '"]')
+        if(elements.length === 0){
+            console.log("The dynamic html with id '" + htmlId + "' changed by '" + id + "' was not found")
         }
         for(let e of elements){
-            e.outerHTML = jsonResult.IdToHtml[id]
+            e.outerHTML = jsonResult.IdToHtml[htmlId]
         }
     }
 }
 window.addEventListener('popstate', async e => {
     const newPath = document.location.pathname;
     console.log(newPath)
-    return changeDynamicValue({Id: 'proact-routing', Value: newPath})
+    return changeDynamicValue('proact-routing', newPath)
 });
 async function proactNavigate(path, event){
     if(event){
         event.preventDefault();
     }
     window.history.pushState({}, '', path)
-    return changeDynamicValue({Id: 'proact-routing', Value: path})
+    return changeDynamicValue('proact-routing', path)
 }
 
-const proactFormSubmit = (triggerOpts, event) => {
+const proactFormSubmit = async (id, event) => {
     event.preventDefault();
     let value = {}
     for (let e of event.target.elements){
@@ -43,8 +44,7 @@ const proactFormSubmit = (triggerOpts, event) => {
             value[e.name] = e.value;
         }
     }
-    triggerOpts.Value = JSON.stringify(value);
-    changeDynamicValue(triggerOpts)
+    await changeDynamicValue(id, JSON.stringify(value))
 }
 
 let webSocket = new WebSocket('wss://' + window.location.host + '/ws')
