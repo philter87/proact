@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Proact.Core.Tag.Context;
+﻿using Proact.Core.Tag.Context;
 
 namespace Proact.Core.Tag;
 public delegate ValueRender<string> ValueRenderConverter<out T>(ValueRender<T> valueRender);
@@ -10,49 +9,25 @@ public delegate T ValueMapper<T>(T value, IRenderContext context);
 
 public static class DynamicValue
 {
-    public static DynamicValue<int> Create(string triggerId, int initialValue)
-    {
-        ValueMapperConverter<int> mapperConverter = vm => (v, sp) => vm(int.Parse(v), sp).ToString();
-        ValueRenderConverter<int> renderConverter = vr => (v, sp) => vr(int.Parse(v), sp);
-        return new DynamicValue<int>(triggerId, initialValue, mapperConverter, renderConverter);
-    }
-    
-    public static DynamicValue<bool> Create(string triggerId, bool initialValue)
-    {
-        ValueMapperConverter<bool> mapperConverter = vm => (v, sp) => vm(bool.Parse(v), sp).ToString();
-        ValueRenderConverter<bool> renderConverter = vr => (v, sp) => vr(bool.Parse(v), sp);
-        return new DynamicValue<bool>(triggerId, initialValue, mapperConverter, renderConverter);
-    }
-    
     public static DynamicValue<T> Create<T>(string triggerId, T initialValue)
         {
-            
-            ValueMapperConverter<T> mapperConverter = vm => (v, sp) => vm(v == null ? default : JsonSerializer.Deserialize<T>(v), sp).ToString();
-            ValueRenderConverter<T> renderConverter = vr => (v, sp) => vr(v == null ? default : JsonSerializer.Deserialize<T>(v), sp);
-            return new DynamicValue<T>(triggerId, initialValue, mapperConverter, renderConverter);
+            return new DynamicValue<T>(triggerId, initialValue);
         }
-    
-    public static DynamicValue<string> Create(string triggerId, string initialValue)
-    {
-        return new DynamicValue<string>(triggerId, initialValue, vm => vm, vr => vr);
-    }
 }
 
 public class DynamicValue<T> : IDynamicValue<T>
 {
-    private readonly ValueRenderConverter<T> _valueRenderConverter;
-    private readonly ValueMapperConverter<T> _valueMapperConverter;
+    private readonly ValueRenderConverter<T> _valueRenderConverter = vr => (v, sp) => vr(Json.Parse<T>(v), sp);
+    private readonly ValueMapperConverter<T> _valueMapperConverter = vm => (v, sp) => vm(Json.Parse<T>(v), sp).ToString();
     private readonly DynamicValueObject _state;
     public string Id => _state.Id;
 
-    public DynamicValue(string id, T initialValue, ValueMapperConverter<T> valueMapperConverter, ValueRenderConverter<T> valueRenderConverter)
+    public DynamicValue(string id, T initialValue)
     {
-        _valueRenderConverter = valueRenderConverter;
-        _valueMapperConverter = valueMapperConverter;
         _state = new DynamicValueObject()
         {
             Id = id,
-            InitialValue = initialValue?.ToString(),
+            InitialValue = Json.Parse(initialValue),
         };
     }
 
@@ -65,14 +40,14 @@ public class DynamicValue<T> : IDynamicValue<T>
     {
         var valueMapperId = IdUtils.CreateId(valueMapper.Method);
         _state.Add(valueMapperId, _valueMapperConverter(valueMapper));
-        return new JavascriptCode($"changeDynamicValue('{_state.Id}', undefined, {{ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
+        return new JavascriptCode($"changeDynamicValue('{_state.Id}', undefined, {{ValueMapperId: '{valueMapperId}'}})");
     }
     
     public JavascriptCode Set(Func<T, T> setter)
     {
         var valueMapperId = IdUtils.CreateId(setter.Method);
         _state.Add(valueMapperId, _valueMapperConverter((v, _) => setter(v)));
-        return new JavascriptCode($"changeDynamicValue('{_state.Id}', undefined, {{ValueMapperId: '{valueMapperId}', InitialValue: {_state.InitialValue}}})");
+        return new JavascriptCode($"changeDynamicValue('{_state.Id}', undefined, {{ValueMapperId: '{valueMapperId}'}})");
     }
 
     public DynamicHtml Map(ValueRender<T> valueRenderGeneric)
@@ -144,8 +119,9 @@ public class DynamicValueObject
         return _dynamicHtmls.Values.ToList();
     }
 
-    public string MapValue(string id, string value, IRenderContext renderContext)
+    public string MapValue(string id, string? value, IRenderContext renderContext)
     {
+        value ??= InitialValue;
         return _valueMappers[id](value, renderContext);
     }
 }

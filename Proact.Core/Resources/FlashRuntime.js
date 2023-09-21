@@ -2,7 +2,7 @@ let proactCurrentValueMap = {};
 
 async function changeDynamicValue(id, value, opts) {
     if (opts?.ValueMapperId) {
-        value = proactCurrentValueMap[id] || opts.InitialValue + '';
+        value = proactCurrentValueMap[id];
     }
     let valueChangeRequest = {...opts, Id: id, Value: value}
     let url = window.location.pathname + "?" + new URLSearchParams({ValueChangeRequest: 'true'});
