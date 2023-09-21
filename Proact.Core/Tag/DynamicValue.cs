@@ -9,27 +9,31 @@ public delegate T ValueMapper<T>(T value, IRenderContext context);
 
 public static class DynamicValue
 {
-    public static DynamicValue<T> Create<T>(string triggerId, T initialValue)
-        {
-            return new DynamicValue<T>(triggerId, initialValue);
-        }
+    public static DynamicValue<T> Create<T>(string id, T initialValue)
+    {
+        var state = new ValueState(id) { InitialValue = Json.Parse(initialValue) };
+        return new DynamicValue<T>(state);
+    }
+    
+    public static DynamicValue<T> CreateWithContext<T>(string id, Func<IRenderContext, T> initialValueCreator)
+    {
+        var state = new ValueState(id) { InitialValueCreator = r => Json.Parse(initialValueCreator(r)) };
+        return new DynamicValue<T>(state);
+    }
 }
 
 public class DynamicValue<T> : IDynamicValue<T>
 {
     private readonly ValueRenderConverter<T> _valueRenderConverter = vr => (v, sp) => vr(Json.Parse<T>(v), sp);
     private readonly ValueMapperConverter<T> _valueMapperConverter = vm => (v, sp) => vm(Json.Parse<T>(v), sp).ToString();
-    private readonly DynamicValueObject _state;
-    public string Id => _state.Id;
+    private readonly ValueState _state;
 
-    public DynamicValue(string id, T initialValue)
+    public DynamicValue(ValueState state)
     {
-        _state = new DynamicValueObject()
-        {
-            Id = id,
-            InitialValue = Json.Parse(initialValue),
-        };
+        _state = state;
     }
+
+    public string Id => _state.Id;
 
     public JavascriptCode Run()
     {
@@ -97,12 +101,18 @@ public interface IDynamicValue<T>
     public DynamicHtml Map(Func<T?, HtmlTag> valueRender);
 }
 
-public class DynamicValueObject
+public class ValueState
 {
     public string Id { get; set; }
     public string? InitialValue { get; set; }
+    public Func<IRenderContext, string>? InitialValueCreator { get; set; }
     private readonly Dictionary<string, ValueMapper<string>> _valueMappers = new();
     private readonly Dictionary<string, DynamicHtml> _dynamicHtmls = new();
+
+    public ValueState(string id)
+    {
+        Id = id;
+    }
 
     public void Add(string id, ValueMapper<string> valueMapper)
     {

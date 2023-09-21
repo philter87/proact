@@ -1,7 +1,6 @@
 ﻿namespace Proact.Core;
 public class DynamicHtmlResult
 {
-    public string? InitialValue { get; set; }
     public object? Value { get; set; }
     public List<HtmlChange> HtmlChanges { get; set; } = new();
 }

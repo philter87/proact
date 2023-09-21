@@ -6,7 +6,7 @@ namespace Proact.Core;
 public class ProactService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, DynamicValueObject> _dynamicValues = new();
+    private readonly Dictionary<string, ValueState> _dynamicValues = new();
 
     public ProactService(IServiceProvider serviceProvider)
     {
@@ -45,8 +45,7 @@ public class ProactService
                     CacheHtmlTags(renderContext);
                     return new HtmlChange(dh.GetDynamicHtmlId(), renderContext.GetHtml());
                 }).ToList(),
-            Value = triggerOptions.Value,
-            InitialValue = dynamicValue.InitialValue,
+            Value = triggerOptions.Value
         };
     }
     

@@ -2,7 +2,7 @@
 
 public class RenderContext : IRenderContext
 {
-    private readonly List<DynamicValueObject> _dynamicValues = new();
+    private readonly List<ValueState> _dynamicValues = new();
     private readonly IServiceProvider _serviceProvider;
     private RenderState _renderState;
     public string UrlPath { get; set; }
@@ -24,9 +24,9 @@ public class RenderContext : IRenderContext
         ValueChanges[triggerOptions.Id] = triggerOptions;
     }
 
-    public ValueChange? GetTriggerOptions(DynamicValueObject dynamicValueObject)
+    public ValueChange? GetTriggerOptions(ValueState valueState)
     {
-        return ValueChanges.GetValueOrDefault(dynamicValueObject.Id);
+        return ValueChanges.GetValueOrDefault(valueState.Id);
     }
 
     public S? GetService<S>() where S: class
@@ -45,7 +45,7 @@ public class RenderContext : IRenderContext
         _dynamicValues.Add(value.GetValue());
     }
 
-    public List<DynamicValueObject> GetValues()
+    public List<ValueState> GetValues()
     {
         return _dynamicValues;
     }

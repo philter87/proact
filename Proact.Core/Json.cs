@@ -26,7 +26,7 @@ public static class Json
         }
         if (typeof(T) == typeof(bool))
         {
-            return val.ToString()!;
+            return val.ToString();
         }
         
         return JsonSerializer.Serialize(val, JsonSerializerOptions);
