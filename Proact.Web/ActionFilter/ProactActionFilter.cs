@@ -35,7 +35,8 @@ public class ProactActionFilter : IActionFilter
     public void OnActionExecuted(ActionExecutedContext context)
     {
         // The context is forwarded to the flashService which is a singleton an able to cache results
-        if (context.Result is ObjectResult { Value: HtmlTag tag })
+        
+        if (IsHtmlRequest(context) && context.Result is ObjectResult { Value: HtmlTag tag })
         {
             var renderContext = new RenderContext(_serviceProvider);
             renderContext.UrlPath = context.HttpContext.Request.Path;
@@ -43,7 +44,12 @@ public class ProactActionFilter : IActionFilter
             context.Result = HtmlResult(html);
         }
     }
-    
+
+    private static bool IsHtmlRequest(ActionExecutedContext context)
+    {
+        return (context.HttpContext.Request.Headers.Accept + "").Contains("text/html");
+    }
+
     private static async Task<ValueChange?> ParseTriggerBody(Stream stream)
     {
         var reader = new StreamReader(stream);
