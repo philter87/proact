@@ -6,7 +6,7 @@ namespace Proact.Core;
 public class ProactService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, ValueState> _dynamicValues = new();
+    private readonly Dictionary<string, Dictionary<string, DynamicValueBase>> _dynamicValues = new();
 
     public ProactService(IServiceProvider serviceProvider)
     {
@@ -29,21 +29,19 @@ public class ProactService
             return null;
         }
         
-        var dynamicValue = _dynamicValues[triggerOptions.Id];
-        if (triggerOptions.ValueMapperId != null)
-        {
-            triggerOptions.Value = dynamicValue.MapValue(triggerOptions.ValueMapperId, triggerOptions.Value, renderState.RenderContext);
-        }
-        
+        var dynamicValues = _dynamicValues[triggerOptions.Id];
+        // if (triggerOptions.ValueMapperId != null)
+        // {
+        //     triggerOptions.Value = dynamicValue.MapValue(triggerOptions.ValueMapperId, triggerOptions.Value, renderState.RenderContext);
+        // }
         return new DynamicHtmlResult()
         {
-            HtmlChanges = dynamicValue.GetDynamicHtml()
-                .Select(dh =>
+            HtmlChanges = dynamicValues.Values.Select(dh =>
                 {
                     renderState.ClearHtml();
                     dh.Render(renderState); 
                     CacheHtmlTags(renderState);
-                    return new HtmlChange(dh.GetDynamicHtmlId(), renderState.GetHtml());
+                    return new HtmlChange(dh.ValueRenderId, renderState.GetHtml());
                 }).ToList(),
             Value = triggerOptions.Value
         };
@@ -61,10 +59,12 @@ public class ProactService
 
     private void CacheHtmlTags(RenderState renderState)
     {
-        
         foreach (var dynamicValue in renderState.GetValues())
         {
-            _dynamicValues[dynamicValue.Id] = dynamicValue;
+            var values = _dynamicValues.GetValueOrDefault(dynamicValue.Id, new Dictionary<string, DynamicValueBase>());
+            values[dynamicValue.ValueRenderId] = dynamicValue;
+            _dynamicValues[dynamicValue.Id] = values;
         }
+        
     }
 }

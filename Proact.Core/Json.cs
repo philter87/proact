@@ -10,7 +10,7 @@ public static class Json
         PropertyNameCaseInsensitive = true
     };
 
-    public static string Parse<T>(T val) 
+    public static string AsString<T>(T val) 
     {
         if (val == null)
         {

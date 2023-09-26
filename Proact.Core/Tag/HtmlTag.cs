@@ -34,6 +34,8 @@ public class HtmlTag : HtmlNode, IEnumerable<HtmlNode>
         
         renderState.AddLine("<script>");
         renderState.AddLine(LoadFlashRuntime.FlashJavascriptRuntime);
+        renderState.AddLine("\r\n");
+        renderState.AddLine(LoadFlashRuntime.DevWebSocketConnection);
         renderState.AddLine("</script>");
     }
 

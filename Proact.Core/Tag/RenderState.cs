@@ -5,7 +5,7 @@ namespace Proact.Core.Tag;
 
 public class RenderState
 {
-    private readonly List<ValueState> _dynamicValues = new();
+    private readonly List<DynamicValueBase> _dynamicValues = new();
     public RenderContext RenderContext { get; }
 
     public RenderState(RenderContext renderContext)
@@ -26,12 +26,12 @@ public class RenderState
         return _builder.ToString();
     }
     
-    internal void AddDynamicHtmlTags(DynamicHtml value)
+    internal void AddDynamicHtmlTags(DynamicValueBase valueBase)
     {
-        _dynamicValues.Add(value.GetValue());
+        _dynamicValues.Add(valueBase);
     }
     
-    public List<ValueState> GetValues()
+    public List<DynamicValueBase> GetValues()
     {
         return _dynamicValues;
     }
