@@ -17,7 +17,7 @@ public class DynamicHtml : HtmlNode
 
     public override RenderContext Render(RenderContext renderContext)
     {
-        var triggerOptions = renderContext.GetTriggerOptions(_valueState);
+        var triggerOptions = renderContext.GetValueChange(_valueState);
         if (triggerOptions != null)
         {
             return RenderStateValue(renderContext, triggerOptions.Value);            

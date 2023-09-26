@@ -15,7 +15,7 @@ public class ProactService
 
     public DynamicHtmlResult? RenderPartial(RenderContext renderContext)
     {
-        var triggerOptionsMap = renderContext.ValueChanges;
+        var triggerOptionsMap = renderContext.Values;
 
         if (triggerOptionsMap.Count == 0)
         {
@@ -51,7 +51,7 @@ public class ProactService
     
     public string Render(HtmlTag tag, RenderContext? renderContext = null)
     {
-        renderContext ??= tag.Render(new RenderContext(_serviceProvider));
+        renderContext ??= tag.Render(new RenderContext(_serviceProvider, "/"));
         CacheHtmlTags(renderContext);
         return renderContext.GetHtml();
     }

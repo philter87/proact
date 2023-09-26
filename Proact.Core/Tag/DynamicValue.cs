@@ -20,6 +20,21 @@ public static class DynamicValue
         var state = new ValueState(id) { InitialValueCreator = r => Json.Parse(initialValueCreator(r)) };
         return new DynamicValue<T>(state);
     }
+
+    public static DynamicValue<string?> CreatePathParameter(string pathParameter)
+    {
+        return CreateWithContext(pathParameter, c => c.PathParameters.GetValueOrDefault(pathParameter));
+    }
+
+    public static DynamicValue<string> CreateQueryParameter(string queryParameter)
+    {
+        return CreateWithContext(queryParameter,
+            c => c.QueryParameters.GetValueOrDefault(queryParameter, new List<string> {""})[0]);
+    }
+    public static DynamicValue<List<string>> CreateQueryParameters(string queryParameter)
+    {
+        return CreateWithContext(queryParameter, c => c.QueryParameters.GetValueOrDefault(queryParameter, new List<string>()));
+    }
 }
 
 public class DynamicValue<T> : IDynamicValue<T>

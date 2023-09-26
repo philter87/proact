@@ -29,4 +29,45 @@ public class RoutesTest
         var html = route.GetHtml();
         Assert.Contains("About", html);
     }
+    
+    [Fact]
+    public void Use_query_parameter()
+    {
+        var url = "http://localhost/home/path?myQueryParameter=HelloWorld";
+        var routing = Routes.Create(
+            new Route("/home", PageWithQueryParameter())
+        );
+
+        var route = routing.Render(Any.RenderContextWithUrl(url));
+        
+        Assert.Contains("HelloWorld", route.GetHtml());
+    }
+    
+    private static HtmlTag PageWithQueryParameter()
+    {
+        var queryParameter = DynamicValue.CreateQueryParameter("myQueryParameter");
+        return div().With("Home", queryParameter);
+    }
+    
+    [Fact]
+    public void Use_path_parameter()
+    {
+        var url = "/page/123123";
+        var routing = Routes.Create(
+            new Route("/", div().With("HOME")),
+            new Route("/page/{pageNumber}", PageWithPathParameter())
+        );
+
+        var route = routing.Render(Any.RenderContextWithUrl(url));
+        
+        Assert.Contains("123123", route.GetHtml());
+    }
+
+    
+
+    private static HtmlTag PageWithPathParameter()
+    {
+        var pageNumber = DynamicValue.CreatePathParameter("pageNumber");
+        return div().With("Page", pageNumber);
+    }
 }

@@ -3,35 +3,34 @@
 public class RenderContext : IRenderContext
 {
     private readonly List<ValueState> _dynamicValues = new();
-    private readonly IServiceProvider _serviceProvider;
+    public IServiceProvider ServiceProvider { get; set; }
     private RenderState _renderState;
-    public string UrlPath { get; set; }
-    public Dictionary<string, ValueChange> ValueChanges { get; } = new();
+    public string CurrentUrlPath { get; set; }
+    public string CurrentUrlPattern { get; set; }
+    public Dictionary<string, List<string>> QueryParameters { get; set; }
+    public Dictionary<string, string> PathParameters { get; set; }
+    public Dictionary<string, ValueChange> Values { get; set; }
 
-    public RenderContext(IServiceProvider serviceProvider, ValueChange? valueChange = null)
+    public RenderContext(IServiceProvider serviceProvider, string currentUrlPath, Dictionary<string, ValueChange>? values = null)
     {
-        _serviceProvider = serviceProvider;
+        ServiceProvider = serviceProvider;
+        CurrentUrlPath = currentUrlPath;
+        CurrentUrlPattern = currentUrlPath;
+        PathParameters = new Dictionary<string, string>();
+        QueryParameters = RenderContextUtils.GetQueryParameters(currentUrlPath);
+        Values = values ?? new Dictionary<string, ValueChange>();
         _renderState = new RenderState();
-        AddTrigger(valueChange);
     }
 
-    private void AddTrigger(ValueChange? triggerOptions)
+    public ValueChange? GetValueChange(ValueState valueState)
     {
-        if (triggerOptions == null)
-        {
-            return;
-        }
-        ValueChanges[triggerOptions.Id] = triggerOptions;
-    }
-
-    public ValueChange? GetTriggerOptions(ValueState valueState)
-    {
-        return ValueChanges.GetValueOrDefault(valueState.Id);
+        Values.TryGetValue(valueState.Id, out ValueChange? value);
+        return value;
     }
 
     public S? GetService<S>() where S: class
     {
-        return (S?) _serviceProvider.GetService(typeof(S));
+        return (S?) ServiceProvider.GetService(typeof(S));
     }
 
     internal RenderContext AddLine(string line)

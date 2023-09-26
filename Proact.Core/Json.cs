@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Web;
 
 namespace Proact.Core;
 
@@ -20,13 +21,10 @@ public static class Json
         {
             return val.ToString()!;
         }
-        if (typeof(T) == typeof(int))
+
+        if (val.GetType().IsPrimitive)
         {
-            return val.ToString()!;
-        }
-        if (typeof(T) == typeof(bool))
-        {
-            return val.ToString();
+            return val+"";
         }
         
         return JsonSerializer.Serialize(val, JsonSerializerOptions);
@@ -42,7 +40,7 @@ public static class Json
         
         if (typeof(T) == typeof(string))
         {
-            return (T)(object)val;
+            return (T)(object)HttpUtility.HtmlEncode(val);
         }
         if (typeof(T) == typeof(int))
         {

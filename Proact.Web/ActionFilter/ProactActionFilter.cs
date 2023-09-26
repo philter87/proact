@@ -1,23 +1,20 @@
-﻿
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Proact.ActionFilter;
 using Proact.Core;
 using Proact.Core.Tag;
-using Proact.Core.Tag.Context;
 
-namespace Proact.ActionFilter;
+namespace Proact.Web.ActionFilter;
 
 public class ProactActionFilter : IActionFilter
 {
     private const string ValueChangeRequest = "ValueChangeRequest";
     private readonly ProactService _proactService;
-    private readonly IServiceProvider _serviceProvider;
 
-    public ProactActionFilter(ProactService proactService, IServiceProvider serviceProvider)
+    public ProactActionFilter(ProactService proactService)
     {
         _proactService = proactService;
-        _serviceProvider = serviceProvider;
     }
 
     public void OnActionExecuting(ActionExecutingContext context)
@@ -27,19 +24,16 @@ public class ProactActionFilter : IActionFilter
             return;
         }
         
-        var renderContext = new RenderContext(_serviceProvider, ParseTriggerBody(context.HttpContext.Request.Body).Result);
+        var renderContext = RenderContextWeb.CreateWithValue(context.HttpContext);
         var jsonResult = _proactService.RenderPartial(renderContext);
         context.Result = JsonResult(jsonResult);
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
     {
-        // The context is forwarded to the flashService which is a singleton an able to cache results
-        
         if (IsHtmlRequest(context) && context.Result is ObjectResult { Value: HtmlTag tag })
         {
-            var renderContext = new RenderContext(_serviceProvider);
-            renderContext.UrlPath = context.HttpContext.Request.Path;
+            var renderContext = RenderContextWeb.Create(context.HttpContext);
             var html = _proactService.Render(tag, tag.Render(renderContext));
             context.Result = HtmlResult(html);
         }
@@ -48,17 +42,6 @@ public class ProactActionFilter : IActionFilter
     private static bool IsHtmlRequest(ActionExecutedContext context)
     {
         return (context.HttpContext.Request.Headers.Accept + "").Contains("text/html");
-    }
-
-    private static async Task<ValueChange?> ParseTriggerBody(Stream stream)
-    {
-        var reader = new StreamReader(stream);
-        var rawMessage = await reader.ReadToEndAsync();
-        
-        return JsonSerializer.Deserialize<ValueChange>(rawMessage, new JsonSerializerOptions()
-        {
-            PropertyNameCaseInsensitive = true
-        });
     }
     
     private static ContentResult? HtmlResult(string? html)
