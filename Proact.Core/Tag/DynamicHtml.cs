@@ -15,28 +15,28 @@ public class DynamicHtml : HtmlNode
         _render = render;
     }
 
-    public override RenderContext Render(RenderContext renderContext)
+    public override RenderState Render(RenderState renderState)
     {
-        var triggerOptions = renderContext.GetValueChange(_valueState);
+        var triggerOptions = renderState.RenderContext.GetValueChange(_valueState);
         if (triggerOptions != null)
         {
-            return RenderStateValue(renderContext, triggerOptions.Value);            
+            return RenderStateValue(renderState, triggerOptions.Value);            
         }
 
         if (_valueState.InitialValueCreator != null)
         {
-            return RenderStateValue(renderContext, _valueState.InitialValueCreator(renderContext));
+            return RenderStateValue(renderState, _valueState.InitialValueCreator(renderState.RenderContext));
         }
-        return RenderStateValue(renderContext, _valueState.InitialValue);
+        return RenderStateValue(renderState, _valueState.InitialValue);
     }
     
-    private RenderContext RenderStateValue(RenderContext renderContext, string? value)
+    private RenderState RenderStateValue(RenderState renderState, string? value)
     {
-        var tag = _render.Invoke(value, renderContext);
+        var tag = _render.Invoke(value, renderState.RenderContext);
         tag.Put("data-dynamic-html-id", _htmlId);
-        tag.Render(renderContext);
-        renderContext.AddDynamicHtmlTags(this);
-        return renderContext;
+        tag.Render(renderState);
+        renderState.AddDynamicHtmlTags(this);
+        return renderState;
     }
 
     public ValueState GetValue()

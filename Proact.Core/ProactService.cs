@@ -13,9 +13,9 @@ public class ProactService
         _serviceProvider = serviceProvider;
     }
 
-    public DynamicHtmlResult? RenderPartial(RenderContext renderContext)
+    public DynamicHtmlResult? RenderPartial(RenderState renderState)
     {
-        var triggerOptionsMap = renderContext.Values;
+        var triggerOptionsMap = renderState.RenderContext.Values;
 
         if (triggerOptionsMap.Count == 0)
         {
@@ -32,7 +32,7 @@ public class ProactService
         var dynamicValue = _dynamicValues[triggerOptions.Id];
         if (triggerOptions.ValueMapperId != null)
         {
-            triggerOptions.Value = dynamicValue.MapValue(triggerOptions.ValueMapperId, triggerOptions.Value, renderContext);
+            triggerOptions.Value = dynamicValue.MapValue(triggerOptions.ValueMapperId, triggerOptions.Value, renderState.RenderContext);
         }
         
         return new DynamicHtmlResult()
@@ -40,24 +40,26 @@ public class ProactService
             HtmlChanges = dynamicValue.GetDynamicHtml()
                 .Select(dh =>
                 {
-                    renderContext.ClearHtml();
-                    dh.Render(renderContext); 
-                    CacheHtmlTags(renderContext);
-                    return new HtmlChange(dh.GetDynamicHtmlId(), renderContext.GetHtml());
+                    renderState.ClearHtml();
+                    dh.Render(renderState); 
+                    CacheHtmlTags(renderState);
+                    return new HtmlChange(dh.GetDynamicHtmlId(), renderState.GetHtml());
                 }).ToList(),
             Value = triggerOptions.Value
         };
     }
     
-    public string Render(HtmlTag tag, RenderContext? renderContext = null)
+    public string Render(HtmlTag tag, RenderState? renderState = null)
     {
-        renderContext ??= tag.Render(new RenderContext(_serviceProvider, "/"));
-        CacheHtmlTags(renderContext);
-        return renderContext.GetHtml();
+        renderState ??= new RenderState(new RenderContext(_serviceProvider, "/"));
+        
+        tag.Render(renderState);
+        CacheHtmlTags(renderState);
+        return renderState.GetHtml();
     }
 
 
-    private void CacheHtmlTags(RenderContext renderState)
+    private void CacheHtmlTags(RenderState renderState)
     {
         
         foreach (var dynamicValue in renderState.GetValues())

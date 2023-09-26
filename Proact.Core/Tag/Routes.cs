@@ -14,7 +14,7 @@ public static class Routes
     private static HtmlTag FindMatchingRoute(Route[] routes, string currentPath, IRenderContext renderContext)
     {
         var matchingRoute = routes
-            .Select(r => r.IsMatched(currentPath))
+            .Select(r => r.GetMatchResult(currentPath))
             .Where(r => r.IsMatched)
             .FirstOrDefault(new RouteMatchResult(routes[0], false));
         

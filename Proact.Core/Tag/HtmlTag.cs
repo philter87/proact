@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using Proact.Core.Tag.Context;
 
 namespace Proact.Core.Tag;
 
@@ -16,26 +15,26 @@ public class HtmlTag : HtmlNode, IEnumerable<HtmlNode>
         Attributes = new Dictionary<string, object>();
     }
 
-    public override RenderContext Render(RenderContext renderContext)
+    public override RenderState Render(RenderState renderState)
     {
-        renderContext.AddLine($"<{_tag}{CreateAttributes()}>");
-        _children.ForEach(childElement => childElement.Render(renderContext));
+        renderState.AddLine($"<{_tag}{CreateAttributes()}>");
+        _children.ForEach(childElement => childElement.Render(renderState));
         
-        AddScriptsEndOfBody(renderContext);
-        renderContext.AddLine($"</{_tag}>");
-        return renderContext;
+        AddScriptsEndOfBody(renderState);
+        renderState.AddLine($"</{_tag}>");
+        return renderState;
     }
 
-    private void AddScriptsEndOfBody(RenderContext renderContext)
+    private void AddScriptsEndOfBody(RenderState renderState)
     {
         if (_tag != "body")
         {
             return;
         }
         
-        renderContext.AddLine("<script>");
-        renderContext.AddLine(LoadFlashRuntime.FlashJavascriptRuntime);
-        renderContext.AddLine("</script>");
+        renderState.AddLine("<script>");
+        renderState.AddLine(LoadFlashRuntime.FlashJavascriptRuntime);
+        renderState.AddLine("</script>");
     }
 
     private string CreateAttributes()

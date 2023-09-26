@@ -1,10 +1,8 @@
-﻿using Proact.Core.Tag.Context;
-
-namespace Proact.Core.Tag;
+﻿namespace Proact.Core.Tag;
 
 public abstract class HtmlNode
 {
-    public abstract RenderContext Render(RenderContext renderContext);
+    public abstract RenderState Render(RenderState renderState);
     
     public static implicit operator HtmlNode(string text) => new HtmlTextNode(text);
     public static implicit operator HtmlNode(HtmlTagFunc func) => func();

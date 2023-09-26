@@ -11,8 +11,8 @@ public class HtmlTextNode : HtmlNode
         _rawContent = rawContent;
     }
 
-    public override RenderContext Render(RenderContext renderContext)
+    public override RenderState Render(RenderState renderState)
     {
-        return renderContext.AddLine(_rawContent);
+        return renderState.AddLine(_rawContent);
     }
 }

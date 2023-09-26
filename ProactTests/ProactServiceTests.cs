@@ -70,7 +70,7 @@ public class ProactServiceTests
         );
 
         sut.Render(tag);
-        var partialRender = sut.RenderPartial(Any.RenderContextWith(TriggerId, "123", IdUtils.CreateId(valueMapper.Method)));
+        var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, "123", IdUtils.CreateId(valueMapper.Method)));
 
         Assert.Single(partialRender.HtmlChanges);
         foreach (var kv in partialRender.HtmlChanges)
@@ -93,7 +93,7 @@ public class ProactServiceTests
         var newValue = "NewValue";
 
         sut.Render(tag);
-        var html = sut.RenderPartial(CreateBody(newValue));
+        var html = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, newValue));
 
         var htmlId = IdUtils.CreateId(valueRender.Method);
         Assert.Equal($"<p data-dynamic-html-id=\"{htmlId}\">{newValue}</p>", html?.HtmlChanges[0].Html);
@@ -154,7 +154,7 @@ public class ProactServiceTests
         var sut = CreateProactService();
 
         sut.Render(tag);
-        var result = sut.RenderPartial(Any.RenderContextWith("condition", "false"));
+        var result = sut.RenderPartial(Any.RenderStateWithValue("condition", "false"));
         
         Assert.Contains("23423", result.HtmlChanges[0].Html);
     }
@@ -168,9 +168,9 @@ public class ProactServiceTests
         var sut = CreateProactService();
 
         sut.Render(tag);
-        sut.RenderPartial(Any.RenderContextWith("condition", "false"));
+        sut.RenderPartial(Any.RenderStateWithValue("condition", "false"));
 
-        var result = sut.RenderPartial(Any.RenderContextWith("nestedValue", "5646987"));
+        var result = sut.RenderPartial(Any.RenderStateWithValue("nestedValue", "5646987"));
         
         Assert.Contains("5646987", result.HtmlChanges[0].Html);
     }
@@ -181,7 +181,7 @@ public class ProactServiceTests
         var valueAsString = JsonSerializer.Serialize(value);
         
         sut.Render(tag);
-        var partialRender = sut.RenderPartial(CreateBody(valueAsString));
+        var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, valueAsString));
 
         return partialRender.HtmlChanges[0].Html;
     }
@@ -190,11 +190,6 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
         return sut.Render(tag);
-    }
-
-    private static RenderContext CreateBody(string newValue)
-    {
-        return Any.RenderContextWith(TriggerId, newValue);
     }
 
     private static ProactService CreateProactService()

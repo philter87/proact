@@ -10,7 +10,7 @@ public class RouteTest
     {
         var route = new Route("/about", new Div());
 
-        var matchResult = route.IsMatched("/about");
+        var matchResult = route.GetMatchResult("/about");
         
         Assert.True(matchResult.IsMatched);
     }
@@ -20,7 +20,17 @@ public class RouteTest
     {
         var route = new Route("/about", new Div());
 
-        var matchResult = route.IsMatched("/not-matching-url");
+        var matchResult = route.GetMatchResult("/not-matching-url");
+        
+        Assert.False(matchResult.IsMatched);
+    }
+    
+    [Fact]
+    public void IsMatched_url_is_not_matched_if_something_is_extra()
+    {
+        var route = new Route("/about", new Div());
+
+        var matchResult = route.GetMatchResult("/about/something-extra");
         
         Assert.False(matchResult.IsMatched);
     }
@@ -30,7 +40,7 @@ public class RouteTest
     {
         var route = new Route("/about", new Div());
 
-        var matchResult = route.IsMatched("/about?myQueryParam=HelloWorld");
+        var matchResult = route.GetMatchResult("/about?myQueryParam=HelloWorld");
         
         Assert.True(matchResult.IsMatched);
     }
@@ -41,7 +51,7 @@ public class RouteTest
     {
         var route = new Route("/page/{pageNumber}", new Div());
 
-        var matchResult = route.IsMatched("/page/123");
+        var matchResult = route.GetMatchResult("/page/123");
         
         Assert.True(matchResult.IsMatched);
         Assert.Equal("123", matchResult.PathParameters["pageNumber"]);
@@ -53,7 +63,7 @@ public class RouteTest
     {
         var route = new Route("/page/{pageNumber}/{section}/{name}", new Div());
 
-        var matchResult = route.IsMatched("/page/123/abc/philip");
+        var matchResult = route.GetMatchResult("/page/123/abc/philip");
         
         Assert.True(matchResult.IsMatched);
         Assert.Equal("123", matchResult.PathParameters["pageNumber"]);

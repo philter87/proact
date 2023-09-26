@@ -14,7 +14,7 @@ public class Route
         Tag = tag;
     }
 
-    public RouteMatchResult IsMatched(string currentUrl)
+    public RouteMatchResult GetMatchResult(string currentUrl)
     {
         var uri = new Uri("http://example.com" + currentUrl);
         if (UrlPattern == uri.AbsolutePath)

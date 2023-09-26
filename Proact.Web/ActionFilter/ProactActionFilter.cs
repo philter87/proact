@@ -24,8 +24,8 @@ public class ProactActionFilter : IActionFilter
             return;
         }
         
-        var renderContext = RenderContextWeb.CreateWithValue(context.HttpContext);
-        var jsonResult = _proactService.RenderPartial(renderContext);
+        var renderState = new RenderState(RenderContextWeb.CreateWithValue(context.HttpContext));
+        var jsonResult = _proactService.RenderPartial(renderState);
         context.Result = JsonResult(jsonResult);
     }
 
@@ -33,8 +33,8 @@ public class ProactActionFilter : IActionFilter
     {
         if (IsHtmlRequest(context) && context.Result is ObjectResult { Value: HtmlTag tag })
         {
-            var renderContext = RenderContextWeb.Create(context.HttpContext);
-            var html = _proactService.Render(tag, tag.Render(renderContext));
+            var renderState = new RenderState(RenderContextWeb.Create(context.HttpContext));
+            var html = _proactService.Render(tag, renderState);
             context.Result = HtmlResult(html);
         }
     }

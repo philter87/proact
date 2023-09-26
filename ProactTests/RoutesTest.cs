@@ -10,7 +10,7 @@ public class RoutesTest
     {
         var routing = Routes.Create(new Route("", div().With("Home")));
 
-        var route = routing.Render(Any.RenderContextWithUrl(""));
+        var route = routing.Render(Any.RenderStateWithUrl(""));
 
         var html = route.GetHtml();
         Assert.Contains("Home", html);
@@ -21,10 +21,10 @@ public class RoutesTest
     {
         var routing = Routes.Create(
             new Route("", div().With("Home")),
-            new Route("about", div().With("About"))
+            new Route("/about", div().With("About"))
             );
 
-        var route = routing.Render(Any.RenderContextWithUrl("about"));
+        var route = routing.Render(Any.RenderStateWithUrl("/about"));
 
         var html = route.GetHtml();
         Assert.Contains("About", html);
@@ -33,12 +33,12 @@ public class RoutesTest
     [Fact]
     public void Use_query_parameter()
     {
-        var url = "http://localhost/home/path?myQueryParameter=HelloWorld";
+        var url = "/home?myQueryParameter=HelloWorld";
         var routing = Routes.Create(
             new Route("/home", PageWithQueryParameter())
         );
 
-        var route = routing.Render(Any.RenderContextWithUrl(url));
+        var route = routing.Render(Any.RenderStateWithUrl(url));
         
         Assert.Contains("HelloWorld", route.GetHtml());
     }
@@ -58,7 +58,7 @@ public class RoutesTest
             new Route("/page/{pageNumber}", PageWithPathParameter())
         );
 
-        var route = routing.Render(Any.RenderContextWithUrl(url));
+        var route = routing.Render(Any.RenderStateWithUrl(url));
         
         Assert.Contains("123123", route.GetHtml());
     }
