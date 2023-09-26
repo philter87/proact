@@ -8,16 +8,16 @@ public class IdUtilsTests
     [Fact]
     public void CreateId()
     {
-        ValueMapper<int> valueMapper = (v, sp) => v + 1;
-        ValueMapper<int> valueMapper1 = (v, sp) => v+1;
-        ValueMapper<int> valueMapper2 = Create();
-        ValueMapper<int> valueMapper3 = (v, sp) => v + 2;
+        ValueSetter<int> valueSetter = (v, sp) => v + 1;
+        ValueSetter<int> valueSetter1 = (v, sp) => v+1;
+        ValueSetter<int> valueSetter2 = Create();
+        ValueSetter<int> valueSetter3 = (v, sp) => v + 2;
 
 
-        var hash = IdUtils.CreateId(valueMapper.Method);
-        var hash1 = IdUtils.CreateId(valueMapper1.Method);
-        var hash2 = IdUtils.CreateId(valueMapper2.Method);
-        var hash3 = IdUtils.CreateId(valueMapper3.Method);
+        var hash = IdUtils.CreateId(valueSetter.Method);
+        var hash1 = IdUtils.CreateId(valueSetter1.Method);
+        var hash2 = IdUtils.CreateId(valueSetter2.Method);
+        var hash3 = IdUtils.CreateId(valueSetter3.Method);
         
         Assert.Equal(hash, hash1);
         Assert.Equal(hash, hash2);
@@ -36,7 +36,7 @@ public class IdUtilsTests
         Assert.NotEqual(hash, hash1);
     }
     
-    private ValueMapper<int> Create()
+    private ValueSetter<int> Create()
     {
         return (value, _) => value + 1;
     }

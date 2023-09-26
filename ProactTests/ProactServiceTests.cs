@@ -62,15 +62,15 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
         var dynamicValue = DynamicValue.Create(TriggerId, 123);
-        ValueMapper<int> valueMapper = (v, _) => v + 1;
+        ValueSetter<int> valueSetter = (v, _) => v + 1;
 
         var tag = div().With(
-            button(onclick: dynamicValue.Set(valueMapper)),
+            button(onclick: dynamicValue.Set(valueSetter)),
             dynamicValue.Map((v, _) => p().With(v + ""))
         );
 
         sut.Render(tag);
-        var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, "123", IdUtils.CreateId(valueMapper.Method)));
+        var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, "123", IdUtils.CreateId(valueSetter.Method)));
 
         Assert.Single(partialRender.HtmlChanges);
         foreach (var kv in partialRender.HtmlChanges)
