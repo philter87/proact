@@ -128,6 +128,15 @@ public class DynamicValue<T> : DynamicValueBase, IDynamicValue<T>
         
         return value;
     }
+
+    public MappedValue<T, TReturn> MapValue<TReturn>(Func<T, IRenderContext, TReturn> valueMapper)
+    {
+        return new MappedValue<T, TReturn>()
+        {
+            ValueMapper = valueMapper,
+            ValueMapperId = IdUtils.CreateId(valueMapper.Method),
+        };
+    }
     
     public JavascriptCode SetFromThisValue()
     {

@@ -17,9 +17,9 @@ public static class Json
             return default;
         }
         
-        if (typeof(T) == typeof(string))
+        if (val is string str)
         {
-            return val.ToString()!;
+            return str;
         }
 
         if (val.GetType().IsPrimitive)
