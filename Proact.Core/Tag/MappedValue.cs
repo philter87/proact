@@ -2,39 +2,77 @@
 
 namespace Proact.Core.Tag;
 
-public class MappedValue<TInput, TReturn>
+public class MappedValue<TInput, TReturn> : HtmlNode, IMappedValue
 {
     public Func<TInput, IRenderContext, TReturn> ValueMapper { get; set; }
-    public string ValueMapperId { get; set; }
+    public string Id { get; set; }
+    public IMappedValue? Parent { get; set; }
+    public List<IMappedValue> Children { get; set; } = new();
+    
 
-    public RenderState RenderValue(RenderState renderState, TInput renderValue)
+    public MappedValue(Func<TInput, IRenderContext, TReturn> valueMapper, IMappedValue? parent = null)
     {
-        var mappedValue = ValueMapper(renderValue, renderState.RenderContext);
-        var htmlNode = MapToTag(mappedValue);
-        
-        htmlNode.Put("data-dynamic-value-id", ValueMapperId);
+        ValueMapper = valueMapper;
+        Parent = parent;
+        Id = IdUtils.CreateId(valueMapper.Method);
+    }
+
+    public override RenderState Render(RenderState renderState)
+    {
+        var value = GetValue(renderState.RenderContext);
+        return RenderValue(renderState, value);
+    }
+    
+    private RenderState RenderValue(RenderState renderState, object renderValue)
+    {
+        var htmlNode = Json.MapToTag(renderValue);
+        htmlNode.Put(Constants.AttributeDynamicValueId, Id);
         htmlNode.Render(renderState);
         return renderState;
     }
 
-    private HtmlTag MapToTag(TReturn mappedValue)
+    public object GetValue(RenderContext renderContext)
     {
-        if (mappedValue is HtmlTag tag)
+        var dependencies = FindDependenciesRecursively(this, new List<IMappedValue>());
+        dependencies.Reverse();
+        var value = dependencies[0].GetValue(renderContext);
+        for (var index = 1; index < dependencies.Count; index++)
         {
-            return tag;
+            var dependency = dependencies[index];
+            value = dependency.MapValue(renderContext, value);
         }
-        
-        return new Span { Json.AsString(mappedValue) };
+
+        return value;
     }
-    
+
+    public object? MapValue(RenderContext renderContext, object parentValue)
+    {
+        return ValueMapper((TInput) parentValue, renderContext);
+    }
     
     public MappedValue<TReturn, TMappedValue> Map<TMappedValue>(Func<TReturn, IRenderContext, TMappedValue> valueMapper)
     {
-        var valueRenderId = IdUtils.CreateId(valueMapper.Method);
-        return new MappedValue<TReturn, TMappedValue>()
-        {
-            ValueMapperId = valueRenderId,
-            ValueMapper = valueMapper,
-        };
+        var value = new MappedValue<TReturn, TMappedValue>(valueMapper, this);
+        Children.Add(value);
+        return value;
     }
+
+    private List<IMappedValue> FindDependenciesRecursively(IMappedValue currentValue, List<IMappedValue> valuePath)
+    {
+        valuePath.Add(currentValue);
+        var parent = currentValue.Parent; 
+        if (parent == null)
+        {
+            return valuePath;
+        }
+        return FindDependenciesRecursively(parent, valuePath);
+    }
+}
+
+public interface IMappedValue
+{
+    public IMappedValue? Parent { get; set; }
+    public string Id { get; set; }
+    internal object GetValue(RenderContext renderContext);
+    internal object? MapValue(RenderContext renderContext, object parentValue);
 }

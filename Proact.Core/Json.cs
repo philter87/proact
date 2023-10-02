@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Web;
+using Proact.Core.Tag;
 
 namespace Proact.Core;
 
@@ -9,6 +10,16 @@ public static class Json
     {
         PropertyNameCaseInsensitive = true
     };
+    
+    public static HtmlTag MapToTag<T>(T mappedValue)
+    {
+        if (mappedValue is HtmlTag tag)
+        {
+            return tag;
+        }
+        
+        return new Span { AsString(mappedValue) };
+    }
 
     public static string AsString<T>(T val) 
     {

@@ -87,7 +87,7 @@ public class DynamicValue<T> : DynamicValueBase, IDynamicValue<T>
     private RenderState RenderStateValue(RenderState renderState, string? value)
     {
         var tag = Mapper(Json.Parse<T>(value), renderState.RenderContext);
-        tag.Put("data-dynamic-value-id", ValueRenderId);
+        tag.Put(Constants.AttributeDynamicValueId, ValueRenderId);
         tag.Render(renderState);
         renderState.AddDynamicHtmlTags(this);
         return renderState;
@@ -118,24 +118,18 @@ public class DynamicValue<T> : DynamicValueBase, IDynamicValue<T>
     
     private DynamicValue<T> Map(ValueMapper<T> valueMapperGeneric, string valueRenderId)
     {
-        var value = new DynamicValue<T>(Id)
+        return new DynamicValue<T>(Id)
         {
             ValueRenderId = valueRenderId,
             Mapper = valueMapperGeneric,
             InitialValue = InitialValue,
             InitialValueCreator = InitialValueCreator,
         };
-        
-        return value;
     }
 
     public MappedValue<T, TReturn> MapValue<TReturn>(Func<T, IRenderContext, TReturn> valueMapper)
     {
-        return new MappedValue<T, TReturn>()
-        {
-            ValueMapper = valueMapper,
-            ValueMapperId = IdUtils.CreateId(valueMapper.Method),
-        };
+        return new MappedValue<T, TReturn>(valueMapper);
     }
     
     public JavascriptCode SetFromThisValue()
