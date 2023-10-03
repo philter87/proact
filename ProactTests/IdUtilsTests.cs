@@ -1,5 +1,6 @@
 ﻿using Proact.Core;
 using Proact.Core.Tag;
+using Proact.Core.Tag.Context;
 
 namespace ProactTests;
 
@@ -8,10 +9,10 @@ public class IdUtilsTests
     [Fact]
     public void CreateId()
     {
-        ValueSetter<int> valueSetter = (v, sp) => v + 1;
-        ValueSetter<int> valueSetter1 = (v, sp) => v+1;
-        ValueSetter<int> valueSetter2 = Create();
-        ValueSetter<int> valueSetter3 = (v, sp) => v + 2;
+        Func<int, IRenderContext, int> valueSetter = (v, sp) => v + 1;
+        Func<int, IRenderContext, int> valueSetter1 = (v, sp) => v+1;
+        Func<int, IRenderContext, int> valueSetter2 = Create();
+        Func<int, IRenderContext, int> valueSetter3 = (v, sp) => v + 2;
 
 
         var hash = IdUtils.CreateId(valueSetter.Method);
@@ -36,7 +37,7 @@ public class IdUtilsTests
         Assert.NotEqual(hash, hash1);
     }
     
-    private ValueSetter<int> Create()
+    private Func<int, IRenderContext, int> Create()
     {
         return (value, _) => value + 1;
     }

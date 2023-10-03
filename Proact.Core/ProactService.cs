@@ -6,7 +6,7 @@ namespace Proact.Core;
 public class ProactService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, Dictionary<string, DynamicValueBase>> _dynamicValues = new();
+    private readonly Dictionary<string, IMappedValue> _rootValues = new();
 
     public ProactService(IServiceProvider serviceProvider)
     {
@@ -24,24 +24,23 @@ public class ProactService
 
         var triggerOptions = triggerOptionsMap.First().Value;
 
-        if (!_dynamicValues.ContainsKey(triggerOptions.Id))
+        if (!_rootValues.ContainsKey(triggerOptions.Id))
         {
             return null;
         }
         
-        var dynamicValues = _dynamicValues[triggerOptions.Id];
-        // if (triggerOptions.ValueMapperId != null)
-        // {
-        //     triggerOptions.Value = dynamicValue.MapValue(triggerOptions.ValueMapperId, triggerOptions.Value, renderState.RenderContext);
-        // }
+        var dynamicValue = _rootValues[triggerOptions.Id];
+        var all = dynamicValue.Children.ToList();
+        all.Add(dynamicValue);
+        
         return new DynamicHtmlResult()
         {
-            HtmlChanges = dynamicValues.Values.Select(dh =>
+            HtmlChanges = all.Select(dh =>
                 {
                     renderState.ClearHtml();
                     dh.Render(renderState); 
-                    CacheHtmlTags(renderState);
-                    return new HtmlChange(dh.ValueRenderId, renderState.GetHtml());
+                    AddRootValueChildren(renderState);
+                    return new HtmlChange(dh.Id, renderState.GetHtml());
                 }).ToList(),
             Value = triggerOptions.Value
         };
@@ -52,19 +51,31 @@ public class ProactService
         renderState ??= new RenderState(new RenderContext(_serviceProvider, "/"));
         
         tag.Render(renderState);
-        CacheHtmlTags(renderState);
+        AddRootValueChildren(renderState);
         return renderState.GetHtml();
     }
 
 
-    private void CacheHtmlTags(RenderState renderState)
+    private void AddRootValueChildren(RenderState renderState)
     {
-        foreach (var dynamicValue in renderState.GetValues())
+        foreach (var rootValue in renderState.GetValues())
         {
-            var values = _dynamicValues.GetValueOrDefault(dynamicValue.Id, new Dictionary<string, DynamicValueBase>());
-            values[dynamicValue.ValueRenderId] = dynamicValue;
-            _dynamicValues[dynamicValue.Id] = values;
+            AddAppendNewChildrenToRootValue(rootValue);
         }
         
+    }
+
+    private void AddAppendNewChildrenToRootValue(IMappedValue rootValue)
+    {
+        var previousRootValue = _rootValues.GetValueOrDefault(rootValue.Id, rootValue);
+        var newChildren = FindNewChildren(rootValue, previousRootValue);
+        previousRootValue.Children.AddRange(newChildren);
+        _rootValues[rootValue.Id] = previousRootValue;
+    }
+
+    private static List<IMappedValue> FindNewChildren(IMappedValue rootValue, IMappedValue previousRootValue)
+    {
+        var newChilden = rootValue.Children.FindAll(r => previousRootValue.Children.All(p => p.Id != r.Id));
+        return newChilden;
     }
 }

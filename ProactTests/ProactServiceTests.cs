@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Proact.Core;
 using Proact.Core.Tag;
+using Proact.Core.Tag.Context;
 using static Proact.Core.Tags;
 
 namespace ProactTests;
@@ -31,7 +32,7 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
         var dynamicValue = DynamicValue.Create(TriggerId, DefaultValue);
-        ValueMapper<string> valueMapper = (v, _) => p().With(v);
+        Func<string, IRenderContext, HtmlTag> valueMapper = (v, _) => p().With(v);
         var tag = div().With(
             dynamicValue.Map(valueMapper)
         );
@@ -84,7 +85,8 @@ public class ProactServiceTests
     {
         var sut = CreateProactService();
         var value = DynamicValue.Create(TriggerId, DefaultValue);
-        ValueMapper<string> valueMapper = (v, _) => p().With(v);
+        
+        Func<string, IRenderContext, HtmlTag> valueMapper = (v, _) => p().With(v);
         var tag = div().With(
             value.Map(valueMapper)
         );
@@ -131,7 +133,23 @@ public class ProactServiceTests
     }
 
     [Fact]
-    public void PartialRender_form_submit()
+    public void PartialRender_form_submit1()
+    {
+        var signUpForm = DynamicValue.Create<NameForm>(TriggerId, null);
+        var nameForm = new NameForm() { FirstName = "Philip", SecondName = "Christiansen" };
+        var tag = div().With(
+            signUpForm
+        );
+
+        var partialRenderedHtml = PartialRenderWithValue(tag, nameForm);
+
+        var expected =
+            "<span data-dynamic-value-id=\"TriggerId\">{\"FirstName\":\"Philip\",\"SecondName\":\"Christiansen\"}</span>";
+        Assert.Equal(expected, partialRenderedHtml);
+    }
+    
+    [Fact]
+    public void PartialRender_form_submit2()
     {
         var signUpForm = DynamicValue.Create<NameForm>(TriggerId, null);
         var nameForm = new NameForm() { FirstName = "Philip", SecondName = "Christiansen" };
@@ -179,7 +197,8 @@ public class ProactServiceTests
         var sut = CreateProactService();
         var valueAsString = JsonSerializer.Serialize(value);
         
-        sut.Render(tag);
+        var html = sut.Render(tag);
+        Assert.NotNull(html);
         var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, valueAsString));
 
         return partialRender.HtmlChanges[0].Html;

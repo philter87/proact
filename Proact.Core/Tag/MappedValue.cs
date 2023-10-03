@@ -8,13 +8,16 @@ public class MappedValue<TInput, TReturn> : HtmlNode, IMappedValue
     public string Id { get; set; }
     public IMappedValue? Parent { get; set; }
     public List<IMappedValue> Children { get; set; } = new();
-    
 
-    public MappedValue(Func<TInput, IRenderContext, TReturn> valueMapper, IMappedValue? parent = null)
+    public MappedValue(Func<TInput, IRenderContext, TReturn> valueMapper, IMappedValue parent) : this(valueMapper, parent, IdUtils.CreateId(valueMapper.Method))
+    {
+    }
+    
+    public MappedValue(Func<TInput, IRenderContext, TReturn> valueMapper, IMappedValue parent, string id)
     {
         ValueMapper = valueMapper;
         Parent = parent;
-        Id = IdUtils.CreateId(valueMapper.Method);
+        Id = id;
     }
 
     public override RenderState Render(RenderState renderState)
@@ -28,6 +31,7 @@ public class MappedValue<TInput, TReturn> : HtmlNode, IMappedValue
         var htmlNode = Json.MapToTag(renderValue);
         htmlNode.Put(Constants.AttributeDynamicValueId, Id);
         htmlNode.Render(renderState);
+        renderState.AddDynamicHtmlTags(this);
         return renderState;
     }
 
@@ -75,4 +79,6 @@ public interface IMappedValue
     public string Id { get; set; }
     internal object GetValue(RenderContext renderContext);
     internal object? MapValue(RenderContext renderContext, object parentValue);
+    public RenderState Render(RenderState renderState);
+    public List<IMappedValue> Children { get; set; }
 }

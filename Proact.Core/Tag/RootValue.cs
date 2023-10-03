@@ -4,6 +4,8 @@ namespace Proact.Core.Tag;
 
 public class RootValue<T> : HtmlNode, IMappedValue
 {
+    public List<IMappedValue> Children { get; set; } = new();
+    
     public RootValue(string id, T initialValue)
     {
         Id = id;
@@ -32,7 +34,23 @@ public class RootValue<T> : HtmlNode, IMappedValue
         var htmlNode = Json.MapToTag(renderValue);
         htmlNode.Put(Constants.AttributeDynamicValueId, Id);
         htmlNode.Render(renderState);
+        renderState.AddDynamicHtmlTags(this);
         return renderState;
+    }
+    
+    public JavascriptCode Run()
+    {
+        return new JavascriptCode($"changeDynamicValue('{Id}')");
+    }
+    
+    public JavascriptCode SetFromThisValue()
+    {
+        return new JavascriptCode($"changeDynamicValue('{Id}', this.value)");
+    }
+
+    public JavascriptCode SetOnSubmit()
+    {
+        return new JavascriptCode($"proactFormSubmit('{Id}', event)");
     }
 
     public object? MapValue(RenderContext renderContext, object parentValue)
@@ -58,8 +76,23 @@ public class RootValue<T> : HtmlNode, IMappedValue
 
     public MappedValue<T, TMappedValue> Map<TMappedValue>(Func<T, IRenderContext, TMappedValue> valueMapper)
     {
-        var mapped = new MappedValue<T, TMappedValue>(valueMapper);
-        mapped.Parent = this;
-        return mapped;
+        return MapWithId(valueMapper, IdUtils.CreateId(valueMapper.Method));
+    }
+    
+    public MappedValue<T, TMappedValue> Map<TMappedValue>(Func<T, TMappedValue> valueMapper)
+    {
+        return MapWithId((t, c) => valueMapper(t), IdUtils.CreateId(valueMapper.Method));
+    }
+    
+    public MappedValue<T, TMappedValue> Map<TMappedValue>(Func<TMappedValue> valueMapper)
+    {
+        return MapWithId((t, c) => valueMapper(), IdUtils.CreateId(valueMapper.Method));
+    }
+
+    private MappedValue<T, TMappedValue> MapWithId<TMappedValue>(Func<T, IRenderContext, TMappedValue> valueMapper, string id)
+    {
+        var mappedValue = new MappedValue<T, TMappedValue>(valueMapper, this, id);
+        Children.Add(mappedValue);
+        return mappedValue;
     }
 }
