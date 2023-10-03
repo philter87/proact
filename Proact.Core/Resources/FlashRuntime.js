@@ -12,19 +12,24 @@ async function changeDynamicValue(id, value, opts) {
         body: JSON.stringify(valueChangeRequest)
     });
 
-    let jsonResult = await response.json();
-    if (jsonResult?.Value) {
-        proactCurrentValueMap[id] = jsonResult?.Value
-    }
-    for (let htmlChange of jsonResult.HtmlChanges) {
-        let elements = document.querySelectorAll('[data-dynamic-html-id="' + htmlChange.Id + '"]')
-        if (elements.length === 0) {
-            console.log("The dynamic html with id '" + htmlChange.Id + "' changed by '" + id + "' was not found")
+    let valueChangeRenders = await response.json();
+    
+    for(let jsonResult of valueChangeRenders){
+        if (jsonResult?.Value) {
+            proactCurrentValueMap[id] = jsonResult?.Value
         }
-        for (let e of elements) {
-            e.outerHTML = htmlChange.Html;
+        for (let htmlChange of jsonResult.Changes) {
+            let elements = document.querySelectorAll('[data-dynamic-value-id="' + htmlChange.Id + '"]')
+            if (elements.length === 0) {
+                console.log("The dynamic html with id '" + htmlChange.Id + "' changed by '" + id + "' was not found")
+            }
+            for (let e of elements) {
+                e.outerHTML = htmlChange.Html;
+            }
         }
     }
+    
+    
 }
 window.addEventListener('popstate', async e => {
     const newPath = document.location.pathname;
@@ -48,22 +53,4 @@ const proactFormSubmit = async (id, event) => {
         }
     }
     await changeDynamicValue(id, JSON.stringify(value))
-}
-
-let webSocket = new WebSocket('wss://' + window.location.host + '/ws')
-
-webSocket.onopen = () => {
-    console.log("WS Open")
-}
-
-webSocket.onmessage = (evt) => {
-    let wsMessage = JSON.parse(evt.data);
-    if(wsMessage.Type == 'HotReload'){
-        location.reload();
-        console.log("Data received", wsMessage);
-    }
-}
-
-webSocket.onclose = () => {
-    console.log("WS Close")
 }

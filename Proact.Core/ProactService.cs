@@ -6,63 +6,81 @@ namespace Proact.Core;
 public class ProactService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, ValueState> _dynamicValues = new();
+    private readonly Dictionary<string, List<IMappedValue>> _valuesByRootId = new();
 
     public ProactService(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
 
-    public DynamicHtmlResult? RenderPartial(RenderContext renderContext)
+    public List<ValueChangeRender> RenderPartial(RenderState renderState)
     {
-        var triggerOptionsMap = renderContext.ValueChanges;
+        var clientChanges = renderState.RenderContext.ValueChanges
+            .Where(vc => _valuesByRootId.ContainsKey(vc.Key))
+            .Select(vc => RenderValueChange(vc.Value, renderState))
+            .ToList();
 
-        if (triggerOptionsMap.Count == 0)
-        {
-            return null;
-        }
+        var serverChanges = renderState.RenderContext.ServerValueChanges
+            .Select(command => RenderValueChange(command, renderState))
+            .ToList();
 
-        var triggerOptions = triggerOptionsMap.First().Value;
+        return clientChanges.Concat(serverChanges).ToList();
+    }
 
-        if (!_dynamicValues.ContainsKey(triggerOptions.Id))
-        {
-            return null;
-        }
+    private ValueChangeRender RenderValueChange(ValueChangeCommand valueChangeOptions, RenderState renderState)
+    {
+        var values = _valuesByRootId[valueChangeOptions.Id];
+
+        var parent = FindRoot(values[0]);
         
-        var dynamicValue = _dynamicValues[triggerOptions.Id];
-        if (triggerOptions.ValueMapperId != null)
+        return new ValueChangeRender()
         {
-            triggerOptions.Value = dynamicValue.MapValue(triggerOptions.ValueMapperId, triggerOptions.Value, renderContext);
-        }
-        
-        return new DynamicHtmlResult()
-        {
-            HtmlChanges = dynamicValue.GetDynamicHtml()
-                .Select(dh =>
-                {
-                    renderContext.ClearHtml();
-                    dh.Render(renderContext); 
-                    CacheHtmlTags(renderContext);
-                    return new HtmlChange(dh.GetDynamicHtmlId(), renderContext.GetHtml());
-                }).ToList(),
-            Value = triggerOptions.Value
+            Changes = values.Select(dh =>
+            {
+                renderState.ClearHtml();
+                dh.Render(renderState);
+                AddRootValueChildren(renderState);
+                return new HtmlChange(dh.Id, renderState.GetHtml());
+            }).ToList(),
+            Value = Json.AsString(parent.GetValue(renderState.RenderContext))
         };
     }
+
+    private IMappedValue FindRoot(IMappedValue value)
+    {
+        return value.Parent == null ? value : FindRoot(value.Parent);
+    }
     
-    public string Render(HtmlTag tag, RenderContext? renderContext = null)
+    public string Render(HtmlTag tag, RenderState? renderState = null)
     {
-        renderContext ??= tag.Render(new RenderContext(_serviceProvider));
-        CacheHtmlTags(renderContext);
-        return renderContext.GetHtml();
-    }
-
-
-    private void CacheHtmlTags(RenderContext renderState)
-    {
+        renderState ??= new RenderState(new RenderContext(_serviceProvider, "/"));
         
-        foreach (var dynamicValue in renderState.GetValues())
-        {
-            _dynamicValues[dynamicValue.Id] = dynamicValue;
-        }
+        tag.Render(renderState);
+        AddRootValueChildren(renderState);
+        return renderState.GetHtml();
     }
+
+
+    private void AddRootValueChildren(RenderState renderState)
+    {
+        foreach (var dynamicValue in renderState.GetDynamicValues())
+        {
+            AddAppendNewChildrenToRootValue(dynamicValue);
+        }
+        
+    }
+
+    private void AddAppendNewChildrenToRootValue(IMappedValue value)
+    {
+        var valuesDependentOnRootValue = _valuesByRootId.GetValueOrDefault(value.RootId, new List<IMappedValue>());
+
+        if (valuesDependentOnRootValue.Exists(v => value.Id == v.Id))
+        {
+            return;
+        }
+        
+        valuesDependentOnRootValue.Add(value);
+        _valuesByRootId[value.RootId] = valuesDependentOnRootValue;
+    }
+
 }

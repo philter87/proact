@@ -7,17 +7,22 @@ namespace ProactTests;
 
 public static class Any
 {
-    public static IServiceProvider ServiceProvider => new ServiceCollection().BuildServiceProvider();
-    public static RenderContext RenderContext => new RenderContext(ServiceProvider);
-    public static RenderContext RenderContextWithUrl(string url)
-    {
-        var renderContext = RenderContext;
-        renderContext.UrlPath = url;
-        return renderContext;
-    }
+    private static IServiceProvider ServiceProvider => new ServiceCollection().BuildServiceProvider();
+    public static RenderContext RenderContextDefault => RenderContextWithUrl("/");
+    public static RenderState RenderStateDefault => RenderStateWithUrl("/");
 
-    public static RenderContext RenderContextWith(string id, string? value, string? valueMapperId = null) => new(ServiceProvider, new ValueChange(id, value, valueMapperId));
-    public static RenderState RenderState => new();
+    public static RenderContext RenderContextWithUrl(string url) =>
+        new(ServiceProvider, url, new Dictionary<string, ValueChangeCommand>());
+    public static RenderState RenderStateWithUrl(string url) => new(new RenderContext(ServiceProvider, url));
+    public static RenderState RenderStateWithValue(string id, string? value, string? valueSetterId = null) => new(
+        new RenderContext(ServiceProvider,
+            "/",
+            new Dictionary<string, ValueChangeCommand>()
+            {
+                { id, new ValueChangeCommand(id, value, valueSetterId) }
+            })
+        );
+    public static RenderState RenderState => new(RenderContextDefault);
     
     
 }

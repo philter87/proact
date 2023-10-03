@@ -1,4 +1,5 @@
 ﻿using Proact.Core;
+using Proact.Web.ActionFilter;
 
 namespace Proact.ActionFilter;
 

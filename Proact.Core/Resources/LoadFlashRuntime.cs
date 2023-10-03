@@ -3,12 +3,8 @@
 public static class LoadFlashRuntime
 {
     private const string NamespaceDirectory = "Proact.Core.Resources.";
-    public static readonly string FlashJavascriptRuntime = ReadFlashJavascriptRuntime();
-
-    public static string ReadFlashJavascriptRuntime()
-    {
-        return ReadResource("FlashRuntime.js");
-    }
+    public static readonly string FlashJavascriptRuntime = ReadResource("FlashRuntime.js");
+    public static readonly string DevWebSocketConnection = ReadResource("WebSocket.js");
     
     private static string ReadResource(string fileName)
     {

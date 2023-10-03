@@ -1,8 +1,9 @@
 ﻿namespace Proact.Core;
-public class DynamicHtmlResult
+
+public class ValueChangeRender
 {
     public object? Value { get; set; }
-    public List<HtmlChange> HtmlChanges { get; set; } = new();
+    public List<HtmlChange> Changes { get; set; } = new();
 }
 
 public class HtmlChange
@@ -21,9 +22,9 @@ public class HtmlChange
     public string Html { get; set; } = "";
 }
 
-public class ValueChange
+public class ValueChangeCommand
 {
-    public ValueChange(string id, string? value, string? valueMapperId = null)
+    public ValueChangeCommand(string id, string? value, string? valueMapperId = null)
     {
         Id = id;
         Value = value;

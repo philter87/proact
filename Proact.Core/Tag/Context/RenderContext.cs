@@ -2,62 +2,31 @@
 
 public class RenderContext : IRenderContext
 {
-    private readonly List<ValueState> _dynamicValues = new();
-    private readonly IServiceProvider _serviceProvider;
-    private RenderState _renderState;
-    public string UrlPath { get; set; }
-    public Dictionary<string, ValueChange> ValueChanges { get; } = new();
+    public IServiceProvider ServiceProvider { get; set; }
+    public string CurrentUrlPath { get; set; }
+    public string CurrentUrlPattern { get; set; }
+    public Dictionary<string, List<string>> QueryParameters { get; set; }
+    public Dictionary<string, string> PathParameters { get; set; }
+    public Dictionary<string, ValueChangeCommand> ValueChanges { get; set; }
+    public List<ValueChangeCommand> ServerValueChanges { get; set; } = new();
 
-    public RenderContext(IServiceProvider serviceProvider, ValueChange? valueChange = null)
+    public RenderContext(IServiceProvider serviceProvider, string currentUrlPath, Dictionary<string, ValueChangeCommand>? values = null)
     {
-        _serviceProvider = serviceProvider;
-        _renderState = new RenderState();
-        AddTrigger(valueChange);
-    }
-
-    private void AddTrigger(ValueChange? triggerOptions)
-    {
-        if (triggerOptions == null)
-        {
-            return;
-        }
-        ValueChanges[triggerOptions.Id] = triggerOptions;
-    }
-
-    public ValueChange? GetTriggerOptions(ValueState valueState)
-    {
-        return ValueChanges.GetValueOrDefault(valueState.Id);
+        ServiceProvider = serviceProvider;
+        CurrentUrlPath = currentUrlPath;
+        CurrentUrlPattern = currentUrlPath;
+        PathParameters = new Dictionary<string, string>();
+        QueryParameters = RenderContextUtils.GetQueryParameters(currentUrlPath);
+        ValueChanges = values ?? new Dictionary<string, ValueChangeCommand>();
     }
 
     public S? GetService<S>() where S: class
     {
-        return (S?) _serviceProvider.GetService(typeof(S));
+        return (S?) ServiceProvider.GetService(typeof(S));
     }
 
-    internal RenderContext AddLine(string line)
+    public void TriggerValueChange<T>(RootValue<T> value, T newValue)
     {
-        _renderState.AddLine(line);
-        return this;
-    }
-
-    internal void AddDynamicHtmlTags(DynamicHtml value)
-    {
-        _dynamicValues.Add(value.GetValue());
-    }
-
-    public List<ValueState> GetValues()
-    {
-        return _dynamicValues;
-    }
-
-    internal void ClearHtml()
-    {
-        _renderState = new RenderState();
-    }
-    
-
-    public string GetHtml()
-    {
-        return _renderState.GetHtml();
+        ServerValueChanges.Add(new ValueChangeCommand(value.Id, Json.AsString(newValue)));
     }
 }

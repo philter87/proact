@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using System.Web;
+using Proact.Core.Tag;
 
 namespace Proact.Core;
 
@@ -8,25 +10,32 @@ public static class Json
     {
         PropertyNameCaseInsensitive = true
     };
+    
+    public static HtmlTag MapToTag<T>(T mappedValue)
+    {
+        if (mappedValue is HtmlTag tag)
+        {
+            return tag;
+        }
+        
+        return new Span { AsString(mappedValue) };
+    }
 
-    public static string Parse<T>(T val) 
+    public static string AsString<T>(T val) 
     {
         if (val == null)
         {
             return default;
         }
         
-        if (typeof(T) == typeof(string))
+        if (val is string str)
         {
-            return val.ToString()!;
+            return str;
         }
-        if (typeof(T) == typeof(int))
+
+        if (val.GetType().IsPrimitive)
         {
-            return val.ToString()!;
-        }
-        if (typeof(T) == typeof(bool))
-        {
-            return val.ToString();
+            return val+"";
         }
         
         return JsonSerializer.Serialize(val, JsonSerializerOptions);
@@ -42,7 +51,7 @@ public static class Json
         
         if (typeof(T) == typeof(string))
         {
-            return (T)(object)val;
+            return (T)(object)HttpUtility.HtmlEncode(val);
         }
         if (typeof(T) == typeof(int))
         {
