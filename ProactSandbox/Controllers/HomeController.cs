@@ -41,7 +41,7 @@ public class HomeController : Controller
                     inputValue.Map(v => p().With(v.ToString())),
                     inputValue,
                     list.Select(s => s).ToList(),
-                    // button(onclick: counter.Set((v, sp) => v + 1)).With("Increment counter"),
+                    button(onclick: counter.Set(v => v + 1)).With("Increment counter"),
                     counter.Map(v => span().With(v.ToString())),
                     counter,
                     new Form(onsubmit: form.SetOnSubmit())

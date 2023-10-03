@@ -14,12 +14,12 @@ public static class Any
     public static RenderContext RenderContextWithUrl(string url) =>
         new(ServiceProvider, url, new Dictionary<string, ValueChange>());
     public static RenderState RenderStateWithUrl(string url) => new(new RenderContext(ServiceProvider, url));
-    public static RenderState RenderStateWithValue(string id, string? value, string? valueMapperId = null) => new(
+    public static RenderState RenderStateWithValue(string id, string? value, string? valueSetterId = null) => new(
         new RenderContext(ServiceProvider,
             "/",
             new Dictionary<string, ValueChange>()
             {
-                { id, new ValueChange(id, value, valueMapperId) }
+                { id, new ValueChange(id, value, valueSetterId) }
             })
         );
     public static RenderState RenderState => new(RenderContextDefault);

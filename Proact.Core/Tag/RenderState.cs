@@ -6,7 +6,6 @@ namespace Proact.Core.Tag;
 public class RenderState
 {
     private readonly List<IMappedValue> _dynamicValues = new();
-    public List<HtmlChange> HtmlChanges { get; } = new();
     public RenderContext RenderContext { get; }
 
     public RenderState(RenderContext renderContext)
@@ -29,26 +28,12 @@ public class RenderState
     
     internal void AddDynamicHtmlTags(IMappedValue valueBase)
     {
-        _dynamicValues.Add(GetParent(valueBase));
-    }
-    
-    private IMappedValue GetParent(IMappedValue value)
-    {
-        if (value.Parent == null)
-        {
-            return value;
-        }
-        return GetParent(value.Parent);
+        _dynamicValues.Add(valueBase);
     }
     
     public List<IMappedValue> GetValues()
     {
         return _dynamicValues;
-    }
-
-    public void AddHtmlChanges(HtmlChange htmlChange)
-    {
-        HtmlChanges.Add(htmlChange);
     }
 
     public void ClearHtml()

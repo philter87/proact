@@ -57,27 +57,27 @@ public class ProactServiceTests
         Assert.Contains(DefaultValue, html2);
     }
 
-    // [Fact]
-    // public void Render_with_value_mapper()
-    // {
-    //     var sut = CreateProactService();
-    //     var dynamicValue = DynamicValue.Create(TriggerId, 123);
-    //     ValueSetter<int> valueSetter = (v, _) => v + 1;
-    //
-    //     var tag = div().With(
-    //         button(onclick: dynamicValue.Set(valueSetter)),
-    //         dynamicValue.Map((v, _) => p().With(v + ""))
-    //     );
-    //
-    //     sut.Render(tag);
-    //     var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, "123", IdUtils.CreateId(valueSetter.Method)));
-    //
-    //     Assert.Single(partialRender.HtmlChanges);
-    //     foreach (var kv in partialRender.HtmlChanges)
-    //     {
-    //         Assert.Contains("124", kv.Html);
-    //     }
-    // }
+    [Fact]
+    public void Render_with_value_mapper()
+    {
+        var sut = CreateProactService();
+        var dynamicValue = DynamicValue.Create(TriggerId, 123);
+        Func<int, int> valueSetter = v => v + 1;
+    
+        var tag = div().With(
+            button(onclick: dynamicValue.Set(valueSetter)),
+            dynamicValue.Map((v, _) => p().With(v + ""))
+        );
+    
+        sut.Render(tag);
+        var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, "123", IdUtils.CreateId(valueSetter.Method)));
+    
+        Assert.Single(partialRender.HtmlChanges);
+        foreach (var kv in partialRender.HtmlChanges)
+        {
+            Assert.Contains("124", kv.Html);
+        }
+    }
     
 
     [Fact]

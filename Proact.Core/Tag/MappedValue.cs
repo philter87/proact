@@ -8,6 +8,7 @@ public class MappedValue<TInput, TReturn> : HtmlNode, IMappedValue
     public string Id { get; set; }
     public IMappedValue? Parent { get; set; }
     public List<IMappedValue> Children { get; set; } = new();
+    public string RootId { get; set; }
 
     public MappedValue(Func<TInput, IRenderContext, TReturn> valueMapper, IMappedValue parent) : this(valueMapper, parent, IdUtils.CreateId(valueMapper.Method))
     {
@@ -17,6 +18,7 @@ public class MappedValue<TInput, TReturn> : HtmlNode, IMappedValue
     {
         ValueMapper = valueMapper;
         Parent = parent;
+        RootId = parent.RootId;
         Id = id;
     }
 
@@ -77,6 +79,7 @@ public interface IMappedValue
 {
     public IMappedValue? Parent { get; set; }
     public string Id { get; set; }
+    public string RootId { get; set; }
     internal object GetValue(RenderContext renderContext);
     internal object? MapValue(RenderContext renderContext, object parentValue);
     public RenderState Render(RenderState renderState);

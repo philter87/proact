@@ -6,7 +6,7 @@ namespace Proact.Core;
 public class ProactService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Dictionary<string, IMappedValue> _rootValues = new();
+    private readonly Dictionary<string, List<IMappedValue>> _valuesByRootId = new();
 
     public ProactService(IServiceProvider serviceProvider)
     {
@@ -15,35 +15,42 @@ public class ProactService
 
     public DynamicHtmlResult? RenderPartial(RenderState renderState)
     {
-        var triggerOptionsMap = renderState.RenderContext.Values;
+        var valueChanges = renderState.RenderContext.Values;
 
-        if (triggerOptionsMap.Count == 0)
+        if (valueChanges.Count == 0)
         {
             return null;
         }
 
-        var triggerOptions = triggerOptionsMap.First().Value;
+        var valueChangeOptions = valueChanges.First().Value;
 
-        if (!_rootValues.ContainsKey(triggerOptions.Id))
+        if (!_valuesByRootId.ContainsKey(valueChangeOptions.Id))
         {
             return null;
         }
         
-        var dynamicValue = _rootValues[triggerOptions.Id];
-        var all = dynamicValue.Children.ToList();
-        all.Add(dynamicValue);
-        
+        var values = _valuesByRootId[valueChangeOptions.Id];
         return new DynamicHtmlResult()
         {
-            HtmlChanges = all.Select(dh =>
+            HtmlChanges = values.Select(dh =>
                 {
                     renderState.ClearHtml();
                     dh.Render(renderState); 
                     AddRootValueChildren(renderState);
                     return new HtmlChange(dh.Id, renderState.GetHtml());
                 }).ToList(),
-            Value = triggerOptions.Value
+            Value = GetParentValue(values[0], renderState)
         };
+    }
+
+    private object GetParentValue(IMappedValue value, RenderState state)
+    {
+        if (value.Parent == null)
+        {
+            return Json.AsString(value.GetValue(state.RenderContext));
+        }
+
+        return GetParentValue(value.Parent, state);
     }
     
     public string Render(HtmlTag tag, RenderState? renderState = null)
@@ -65,17 +72,17 @@ public class ProactService
         
     }
 
-    private void AddAppendNewChildrenToRootValue(IMappedValue rootValue)
+    private void AddAppendNewChildrenToRootValue(IMappedValue value)
     {
-        var previousRootValue = _rootValues.GetValueOrDefault(rootValue.Id, rootValue);
-        var newChildren = FindNewChildren(rootValue, previousRootValue);
-        previousRootValue.Children.AddRange(newChildren);
-        _rootValues[rootValue.Id] = previousRootValue;
+        var valuesDependentOnRootValue = _valuesByRootId.GetValueOrDefault(value.RootId, new List<IMappedValue>());
+
+        if (valuesDependentOnRootValue.Exists(v => value.Id == v.Id))
+        {
+            return;
+        }
+        
+        valuesDependentOnRootValue.Add(value);
+        _valuesByRootId[value.RootId] = valuesDependentOnRootValue;
     }
 
-    private static List<IMappedValue> FindNewChildren(IMappedValue rootValue, IMappedValue previousRootValue)
-    {
-        var newChilden = rootValue.Children.FindAll(r => previousRootValue.Children.All(p => p.Id != r.Id));
-        return newChilden;
-    }
 }

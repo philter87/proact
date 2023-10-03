@@ -19,11 +19,6 @@ public class RenderContext : IRenderContext
         Values = values ?? new Dictionary<string, ValueChange>();
     }
 
-    public ValueChange? GetValueChange(string dynamicValueId)
-    {
-        return Values.GetValueOrDefault(dynamicValueId);
-    }
-
     public S? GetService<S>() where S: class
     {
         return (S?) ServiceProvider.GetService(typeof(S));

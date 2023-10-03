@@ -9,7 +9,7 @@ public class MappedValueTest
     public void GetValue_when_parent_is_Philip_and_mapping_adds_C_we_should_get_PhilipC()
     {
         var val = new RootValue<string>("Name", "Philip");
-        var mappedValue = val.Map((firstName, c) => firstName + "C");
+        var mappedValue = val.Map((firstName, _) => firstName + "C");
 
         var value = mappedValue.GetValue(Any.RenderContextDefault);
 
@@ -20,7 +20,7 @@ public class MappedValueTest
     [Fact]
     public void GetValue_with_several_mappings()
     {
-        var mappedValue = new RootValue<string>("Initials","P").Map((v, c) => v + "H").Map((v, c) => v + "C");
+        var mappedValue = new RootValue<string>("Initials","P").Map((v, _) => v + "H").Map((v, c) => v + "C");
 
         var value = mappedValue.GetValue(Any.RenderContextDefault);
 
@@ -37,6 +37,22 @@ public class MappedValueTest
         var value = mappedValue.GetValue(renderState.RenderContext);
 
         Assert.Equal("PeteC", value);
+    }
+    
+    [Fact]
+    public void Different_mappings_should_have_different_ids_but_all_reference_root_id()
+    {
+        var empty = new RootValue<string>("Name", "");
+        
+        var first = empty.Map((v, _) => v + "1");
+        var second = empty.Map(v => v + "2");
+        var third = empty.Map(() => "3");
+
+        Assert.NotEqual(first.Id, second.Id);
+        Assert.NotEqual(second.Id, third.Id);
+        Assert.Equal(empty.Id, first.RootId);
+        Assert.Equal(empty.Id, second.RootId);
+        Assert.Equal(empty.Id, third.RootId);
     }
 
     [Fact]
@@ -81,7 +97,7 @@ public class MappedValueTest
 
         var renderState = fullName.Render(Any.RenderState);
         
-        Assert.Equal("<span data-dynamic-value-id=\"GdS0hGBb\">Philip C</span>", renderState.GetHtml());
+        Assert.Equal("<span data-dynamic-value-id=\"OsnSr5ZA\">Philip C</span>", renderState.GetHtml());
     }
     
     [Fact]
