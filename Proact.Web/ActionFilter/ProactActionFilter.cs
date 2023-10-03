@@ -57,13 +57,8 @@ public class ProactActionFilter : IActionFilter
         };
     }
 
-    private static ContentResult? JsonResult(DynamicHtmlResult? dynamicHtmlResult)
+    private static ContentResult? JsonResult(List<ValueChangeRender> dynamicHtmlResult)
     {
-        if (dynamicHtmlResult == null)
-        {
-            return null;
-        }
-
         return new ContentResult()
         {
             ContentType = "application/json",

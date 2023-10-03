@@ -31,7 +31,7 @@ public class RenderState
         _dynamicValues.Add(valueBase);
     }
     
-    public List<IMappedValue> GetValues()
+    public List<IMappedValue> GetDynamicValues()
     {
         return _dynamicValues;
     }

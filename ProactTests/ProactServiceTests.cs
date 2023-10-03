@@ -72,8 +72,8 @@ public class ProactServiceTests
         sut.Render(tag);
         var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, "123", IdUtils.CreateId(valueSetter.Method)));
     
-        Assert.Single(partialRender.HtmlChanges);
-        foreach (var kv in partialRender.HtmlChanges)
+        Assert.Single(partialRender[0].Changes);
+        foreach (var kv in partialRender[0].Changes)
         {
             Assert.Contains("124", kv.Html);
         }
@@ -97,7 +97,7 @@ public class ProactServiceTests
         var html = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, newValue));
 
         var htmlId = IdUtils.CreateId(valueMapper.Method);
-        Assert.Equal($"<p data-dynamic-value-id=\"{htmlId}\">{newValue}</p>", html?.HtmlChanges[0].Html);
+        Assert.Equal($"<p data-dynamic-value-id=\"{htmlId}\">{newValue}</p>", html[0].Changes[0].Html);
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public class ProactServiceTests
         sut.Render(tag);
         var result = sut.RenderPartial(Any.RenderStateWithValue("condition", "false"));
         
-        Assert.Contains("23423", result.HtmlChanges[0].Html);
+        Assert.Contains("23423", result[0].Changes[0].Html);
     }
     
     [Fact]
@@ -189,7 +189,7 @@ public class ProactServiceTests
 
         var result = sut.RenderPartial(Any.RenderStateWithValue("nestedValue", "5646987"));
         
-        Assert.Contains("5646987", result.HtmlChanges[0].Html);
+        Assert.Contains("5646987", result[0].Changes[0].Html);
     }
 
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)
@@ -201,7 +201,7 @@ public class ProactServiceTests
         Assert.NotNull(html);
         var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, valueAsString));
 
-        return partialRender.HtmlChanges[0].Html;
+        return partialRender[0].Changes[0].Html;
     }
 
     private string Render(HtmlTag tag)

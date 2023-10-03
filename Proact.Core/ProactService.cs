@@ -13,44 +13,42 @@ public class ProactService
         _serviceProvider = serviceProvider;
     }
 
-    public DynamicHtmlResult? RenderPartial(RenderState renderState)
+    public List<ValueChangeRender> RenderPartial(RenderState renderState)
     {
-        var valueChanges = renderState.RenderContext.Values;
+        var clientChanges = renderState.RenderContext.ValueChanges
+            .Where(vc => _valuesByRootId.ContainsKey(vc.Key))
+            .Select(vc => RenderValueChange(vc.Value, renderState))
+            .ToList();
 
-        if (valueChanges.Count == 0)
-        {
-            return null;
-        }
+        var serverChanges = renderState.RenderContext.ServerValueChanges
+            .Select(command => RenderValueChange(command, renderState))
+            .ToList();
 
-        var valueChangeOptions = valueChanges.First().Value;
+        return clientChanges.Concat(serverChanges).ToList();
+    }
 
-        if (!_valuesByRootId.ContainsKey(valueChangeOptions.Id))
-        {
-            return null;
-        }
-        
+    private ValueChangeRender RenderValueChange(ValueChangeCommand valueChangeOptions, RenderState renderState)
+    {
         var values = _valuesByRootId[valueChangeOptions.Id];
-        return new DynamicHtmlResult()
+
+        var parent = FindRoot(values[0]);
+        
+        return new ValueChangeRender()
         {
-            HtmlChanges = values.Select(dh =>
-                {
-                    renderState.ClearHtml();
-                    dh.Render(renderState); 
-                    AddRootValueChildren(renderState);
-                    return new HtmlChange(dh.Id, renderState.GetHtml());
-                }).ToList(),
-            Value = GetParentValue(values[0], renderState)
+            Changes = values.Select(dh =>
+            {
+                renderState.ClearHtml();
+                dh.Render(renderState);
+                AddRootValueChildren(renderState);
+                return new HtmlChange(dh.Id, renderState.GetHtml());
+            }).ToList(),
+            Value = Json.AsString(parent.GetValue(renderState.RenderContext))
         };
     }
 
-    private object GetParentValue(IMappedValue value, RenderState state)
+    private IMappedValue FindRoot(IMappedValue value)
     {
-        if (value.Parent == null)
-        {
-            return Json.AsString(value.GetValue(state.RenderContext));
-        }
-
-        return GetParentValue(value.Parent, state);
+        return value.Parent == null ? value : FindRoot(value.Parent);
     }
     
     public string Render(HtmlTag tag, RenderState? renderState = null)
@@ -65,9 +63,9 @@ public class ProactService
 
     private void AddRootValueChildren(RenderState renderState)
     {
-        foreach (var rootValue in renderState.GetValues())
+        foreach (var dynamicValue in renderState.GetDynamicValues())
         {
-            AddAppendNewChildrenToRootValue(rootValue);
+            AddAppendNewChildrenToRootValue(dynamicValue);
         }
         
     }

@@ -40,7 +40,6 @@ public class MappedValue<TInput, TReturn> : HtmlNode, IMappedValue
     public object GetValue(RenderContext renderContext)
     {
         var dependencies = FindDependenciesRecursively(this, new List<IMappedValue>());
-        dependencies.Reverse();
         var value = dependencies[0].GetValue(renderContext);
         for (var index = 1; index < dependencies.Count; index++)
         {
@@ -69,6 +68,7 @@ public class MappedValue<TInput, TReturn> : HtmlNode, IMappedValue
         var parent = currentValue.Parent; 
         if (parent == null)
         {
+            valuePath.Reverse();
             return valuePath;
         }
         return FindDependenciesRecursively(parent, valuePath);
@@ -77,11 +77,11 @@ public class MappedValue<TInput, TReturn> : HtmlNode, IMappedValue
 
 public interface IMappedValue
 {
-    public IMappedValue? Parent { get; set; }
-    public string Id { get; set; }
-    public string RootId { get; set; }
+    internal IMappedValue? Parent { get; set; }
+    internal string Id { get; set; }
+    internal string RootId { get; set; }
     internal object GetValue(RenderContext renderContext);
     internal object? MapValue(RenderContext renderContext, object parentValue);
-    public RenderState Render(RenderState renderState);
-    public List<IMappedValue> Children { get; set; }
+    internal RenderState Render(RenderState renderState);
+    internal List<IMappedValue> Children { get; set; }
 }

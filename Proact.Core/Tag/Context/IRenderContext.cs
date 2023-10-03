@@ -11,12 +11,11 @@ public interface IRenderContext
 
     public Dictionary<string, string> PathParameters { get; set; }
 
-    public Dictionary<string, ValueChange> Values { get; set; }
-
-    //public T Value<T>();
+    public Dictionary<string, ValueChangeCommand> ValueChanges { get; set; }
+    
+    public void TriggerValueChange<T>(RootValue<T> value, T newValue);
     // public void Navigate();
-    // public void TriggerValueChange<T>(DynamicValue<T> value, T newValue);
-    // public V Value<V>();
+    
     
     // public void SetHttpCookie();
     // public void SetHttpHeader();

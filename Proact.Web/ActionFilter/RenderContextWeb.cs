@@ -11,7 +11,7 @@ public static class RenderContextWeb
         var renderContext = Create(httpContext);
         var valueChange = ParseTriggerBody(httpContext.Request.Body).Result;
         
-        renderContext.Values = new Dictionary<string, ValueChange>()
+        renderContext.ValueChanges = new Dictionary<string, ValueChangeCommand>()
         {
             { valueChange.Id, valueChange }
         };
@@ -20,14 +20,14 @@ public static class RenderContextWeb
     
     public static RenderContext Create(HttpContext httpContext)
     {
-        return new RenderContext(httpContext.RequestServices, httpContext.Request.Path, new Dictionary<string, ValueChange>());
+        return new RenderContext(httpContext.RequestServices, httpContext.Request.Path, new Dictionary<string, ValueChangeCommand>());
     }
     
-    private static async Task<ValueChange?> ParseTriggerBody(Stream stream)
+    private static async Task<ValueChangeCommand?> ParseTriggerBody(Stream stream)
     {
         var reader = new StreamReader(stream);
         var rawMessage = await reader.ReadToEndAsync();
-        return JsonSerializer.Deserialize<ValueChange>(rawMessage, new JsonSerializerOptions()
+        return JsonSerializer.Deserialize<ValueChangeCommand>(rawMessage, new JsonSerializerOptions()
         {
             PropertyNameCaseInsensitive = true,
         });

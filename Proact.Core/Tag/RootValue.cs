@@ -4,10 +4,11 @@ namespace Proact.Core.Tag;
 
 public class RootValue<T> : HtmlNode, IMappedValue
 {
+    public string RootId { get; set; }
     public List<IMappedValue> Children { get; set; } = new();
 
-    private readonly Dictionary<string, Func<T, IRenderContext, T>> valueSetters = new();
-    public string RootId { get; set; }
+    private readonly Dictionary<string, Func<T, IRenderContext, T>> _valueSetters = new();
+    private readonly List<Action<T, IRenderContext>> _sideEffects = new();
 
     public RootValue(string id, T initialValue)
     {
@@ -40,6 +41,10 @@ public class RootValue<T> : HtmlNode, IMappedValue
         htmlNode.Put(Constants.AttributeDynamicValueId, Id);
         htmlNode.Render(renderState);
         renderState.AddDynamicHtmlTags(this);
+        if (renderState.RenderContext.ValueChanges.ContainsKey(Id))
+        {
+            _sideEffects.ForEach(se => se((T)renderValue, renderState.RenderContext));
+        }
         return renderState;
     }
     
@@ -75,11 +80,23 @@ public class RootValue<T> : HtmlNode, IMappedValue
     
     private JavascriptCode AddSetter(Func<T, IRenderContext, T> setter, string id)
     {
-        valueSetters.Add(id, setter);
+        _valueSetters.Add(id, setter);
         return new JavascriptCode($"changeDynamicValue('{Id}', undefined, {{ValueMapperId: '{id}'}})");
     }
-    
-    
+
+    public void ExecuteSideEffects(RenderContext context)
+    {
+        if (!context.ValueChanges.ContainsKey(Id))
+        {
+            return;
+        }
+
+        var value = GetValue(context);
+        foreach (var sideEffect in _sideEffects)
+        {
+            sideEffect((T)value, context);
+        }
+    }
 
     public object MapValue(RenderContext renderContext, object parentValue)
     {
@@ -96,18 +113,23 @@ public class RootValue<T> : HtmlNode, IMappedValue
 
     private object SetValue(object value, RenderContext renderContext)
     {
-        var valueChangeOptions = renderContext.Values.GetValueOrDefault(Id);
+        var valueChangeOptions = renderContext.ValueChanges.GetValueOrDefault(Id);
         if (valueChangeOptions is not { ValueMapperId: not null })
         {
             return value;
         }
-        var valueSetter = valueSetters.GetValueOrDefault(valueChangeOptions.ValueMapperId);
+        var valueSetter = _valueSetters.GetValueOrDefault(valueChangeOptions.ValueMapperId);
         return valueSetter == null ? value : valueSetter((T) value, renderContext);
+    }
+
+    public void OnChange(Action<T, IRenderContext> onChange)
+    {
+        _sideEffects.Add(onChange);
     }
 
     public object GetValueWithoutSetter(RenderContext renderContext)
     {
-        var valueChangeOptions = renderContext.Values.GetValueOrDefault(Id);
+        var valueChangeOptions = renderContext.ValueChanges.GetValueOrDefault(Id);
         if (valueChangeOptions != null)
         {
             return Json.Parse<T>(valueChangeOptions.Value);

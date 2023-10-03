@@ -7,20 +7,26 @@ public class RenderContext : IRenderContext
     public string CurrentUrlPattern { get; set; }
     public Dictionary<string, List<string>> QueryParameters { get; set; }
     public Dictionary<string, string> PathParameters { get; set; }
-    public Dictionary<string, ValueChange> Values { get; set; }
+    public Dictionary<string, ValueChangeCommand> ValueChanges { get; set; }
+    public List<ValueChangeCommand> ServerValueChanges { get; set; } = new();
 
-    public RenderContext(IServiceProvider serviceProvider, string currentUrlPath, Dictionary<string, ValueChange>? values = null)
+    public RenderContext(IServiceProvider serviceProvider, string currentUrlPath, Dictionary<string, ValueChangeCommand>? values = null)
     {
         ServiceProvider = serviceProvider;
         CurrentUrlPath = currentUrlPath;
         CurrentUrlPattern = currentUrlPath;
         PathParameters = new Dictionary<string, string>();
         QueryParameters = RenderContextUtils.GetQueryParameters(currentUrlPath);
-        Values = values ?? new Dictionary<string, ValueChange>();
+        ValueChanges = values ?? new Dictionary<string, ValueChangeCommand>();
     }
 
     public S? GetService<S>() where S: class
     {
         return (S?) ServiceProvider.GetService(typeof(S));
+    }
+
+    public void TriggerValueChange<T>(RootValue<T> value, T newValue)
+    {
+        ServerValueChanges.Add(new ValueChangeCommand(value.Id, Json.AsString(newValue)));
     }
 }
