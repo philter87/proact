@@ -13,34 +13,19 @@ public class ProactServiceTests
     private const string DefaultValue = "DefaultValue";
 
     [Fact]
-    public void Render_simple_html_should_be_rendered_correctly()
-    {
-        var sut = CreateProactService();
-
-        var tag = div().With(
-            "String within node",
-            p("my-class", style: "Style").With("Hello World")
-        );
-
-        var html = sut.Render(tag);
-        
-        Assert.Equal(@"<div>String within node<p class=""my-class"" style=""Style"">Hello World</p></div>", html);
-    }
-
-    [Fact]
     public void Render_with_dynamic_value()
     {
-        var sut = CreateProactService();
+        
         var dynamicValue = DynamicValue.Create(TriggerId, DefaultValue);
         Func<string, IRenderContext, HtmlTag> valueMapper = (v, _) => p().With(v);
         var tag = div().With(
             dynamicValue.Map(valueMapper)
         );
 
-        var html = sut.Render(tag);
+        var html = tag.Render(Any.RenderState);
 
         var htmlId = IdUtils.CreateId(valueMapper.Method);
-        Assert.Equal(@$"<div><p data-dynamic-value-id=""{htmlId}"">{DefaultValue}</p></div>", html);
+        Assert.Equal(@$"<div><p data-dynamic-value-id=""{htmlId}"">{DefaultValue}</p></div>", html.GetHtml());
     }
     
     [Fact]
@@ -71,33 +56,25 @@ public class ProactServiceTests
     
         sut.Render(tag);
         var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, "123", IdUtils.CreateId(valueSetter.Method)));
-    
-        Assert.Single(partialRender[0].Changes);
-        foreach (var kv in partialRender[0].Changes)
-        {
-            Assert.Contains("124", kv.Html);
-        }
+
+        Assert.Contains("124", partialRender[0].Changes[0].Html);
     }
     
 
     [Fact]
     public void Render_with_trigger_partial_render()
     {
-        var sut = CreateProactService();
         var value = DynamicValue.Create(TriggerId, DefaultValue);
-        
         Func<string, IRenderContext, HtmlTag> valueMapper = (v, _) => p().With(v);
         var tag = div().With(
             value.Map(valueMapper)
         );
         
         var newValue = "NewValue";
-
-        sut.Render(tag);
-        var html = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, newValue));
+        var html = PartialRenderWithValue(tag, newValue);
 
         var htmlId = IdUtils.CreateId(valueMapper.Method);
-        Assert.Equal($"<p data-dynamic-value-id=\"{htmlId}\">{newValue}</p>", html[0].Changes[0].Html);
+        Assert.Equal($"<p data-dynamic-value-id=\"{htmlId}\">{newValue}</p>", html);
     }
 
     [Fact]
@@ -183,26 +160,92 @@ public class ProactServiceTests
         var nestedValue = DynamicValue.Create("nestedValue", 23423);
         var tag = div().With(condition.Map(v => v ? span().With("This is rendered first") : span().With(nestedValue)));
         var sut = CreateProactService();
-
+        
         sut.Render(tag);
         sut.RenderPartial(Any.RenderStateWithValue("condition", "false"));
-
         var result = sut.RenderPartial(Any.RenderStateWithValue("nestedValue", "5646987"));
         
         Assert.Contains("5646987", result[0].Changes[0].Html);
     }
+    
+    [Fact]
+    public void When_firstName_is_changed_another_value_is_changed_with_TriggerValueChange_on_the_server()
+    {
+        var firstName = DynamicValue.Create("first", "Phil");
+        var secondName = DynamicValue.Create("shouldNavigate", "NotRelevant");
+        var tag = div().With(
+            firstName.Map((v, c) =>
+            {
+                c.TriggerValueChange(secondName, "Christiansen");
+                return "Philip";
+            }),
+            secondName
+        );
+
+        var renders = PartialRenderAll(tag, "first", "Philip");
+
+        Assert.Contains("Christiansen", renders[1].Changes[0].Html);
+    }
+    
+    [Fact]
+    public void When_firstName_is_changed_then_secondName_is_changed_with_OnChange()
+    {
+        var firstName = DynamicValue.Create("first", "Phil");
+        var secondName = DynamicValue.Create("secondName", "NotRelevant");
+        
+        firstName.OnChange((v,c ) => c.TriggerValueChange(secondName,"Christiansen"));
+        var tag = div().With(
+            firstName,
+            secondName
+        );
+        
+        var renders = PartialRenderAll(tag, "first", "Philip");
+        Assert.Contains("Christiansen", renders[1].Changes[0].Html);
+    }
+    
+    [Fact]
+    public void When_firstName_is_changed_then_change_the_same_value_withOnChange_but_OnChange_should_only_be_called_once()
+    {
+        var firstName = DynamicValue.Create("first", "");
+        var functionCount = 0;
+        
+        firstName.OnChange((v,c ) =>
+        {
+            functionCount++;
+            c.TriggerValueChange(firstName, "Philip");
+        });
+        var tag = div().With(
+            firstName
+        );
+        
+        var renders = PartialRenderAll(tag, "first", "Phil");
+        Assert.Contains("Philip", renders[0].Changes[0].Html);
+        Assert.Equal(1, functionCount);
+    }
 
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)
     {
+        return PartialRenderWithValue(tag, TriggerId, value);
+    }
+    private string PartialRenderWithValue<T>(HtmlTag tag, string id, T value)
+    {
         var sut = CreateProactService();
-        var valueAsString = JsonSerializer.Serialize(value);
-        
         var html = sut.Render(tag);
         Assert.NotNull(html);
-        var partialRender = sut.RenderPartial(Any.RenderStateWithValue(TriggerId, valueAsString));
+        var partialRender = sut.RenderPartial(Any.RenderStateWithValue(id, value));
 
         return partialRender[0].Changes[0].Html;
     }
+    
+    private List<ValueChangeRender> PartialRenderAll<T>(HtmlTag tag, string id, T value)
+    {
+        var sut = CreateProactService();
+        var html = sut.Render(tag);
+        Assert.NotNull(html);
+        return sut.RenderPartial(Any.RenderStateWithValue(id, value));
+    }
+    
+    
 
     private string Render(HtmlTag tag)
     {

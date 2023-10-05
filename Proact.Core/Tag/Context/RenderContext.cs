@@ -8,6 +8,8 @@ public class RenderContext : IRenderContext
     public Dictionary<string, List<string>> QueryParameters { get; set; }
     public Dictionary<string, string> PathParameters { get; set; }
     public Dictionary<string, ValueChangeCommand> ValueChanges { get; set; }
+    public Dictionary<string, object> CalculatedValues { get; set; } = new();
+    public List<string> ExecutedSideEffects { get; set; } = new();
     public List<ValueChangeCommand> ServerValueChanges { get; set; } = new();
 
     public RenderContext(IServiceProvider serviceProvider, string currentUrlPath, Dictionary<string, ValueChangeCommand>? values = null)

@@ -2,14 +2,9 @@
 
 namespace Proact.Core.Tag;
 
-public class RootValue<T> : HtmlNode, IMappedValue
+public class RootValue<T> : ValueBase<T>
 {
-    public string RootId { get; set; }
-    public List<IMappedValue> Children { get; set; } = new();
-
     private readonly Dictionary<string, Func<T, IRenderContext, T>> _valueSetters = new();
-    private readonly List<Action<T, IRenderContext>> _sideEffects = new();
-
     public RootValue(string id, T initialValue)
     {
         Id = id;
@@ -23,29 +18,12 @@ public class RootValue<T> : HtmlNode, IMappedValue
         RootId = id;
         InitialValueCreator = initialValueCreator;
     }
-
-    public string Id { get; set; }
-    public T InitialValue { get; set; }
-    public Func<IRenderContext, T>? InitialValueCreator { get; set; }
-    public IMappedValue? Parent { get; set; } = null;
+    private T InitialValue { get; set; }
+    private Func<IRenderContext, T>? InitialValueCreator { get; set; }
     
-    public override RenderState Render(RenderState renderState)
+    public void OnChange(Action<T, IRenderContext> onChange)
     {
-        var value = GetValue(renderState.RenderContext);
-        return RenderValue(renderState, value);
-    }
-    
-    private RenderState RenderValue(RenderState renderState, object renderValue)
-    {
-        var htmlNode = Json.MapToTag(renderValue);
-        htmlNode.Put(Constants.AttributeDynamicValueId, Id);
-        htmlNode.Render(renderState);
-        renderState.AddDynamicHtmlTags(this);
-        if (renderState.RenderContext.ValueChanges.ContainsKey(Id))
-        {
-            _sideEffects.ForEach(se => se((T)renderValue, renderState.RenderContext));
-        }
-        return renderState;
+        SideEffects.Add(SideEffect.Create(onChange));
     }
     
     public JavascriptCode Run()
@@ -84,30 +62,21 @@ public class RootValue<T> : HtmlNode, IMappedValue
         return new JavascriptCode($"changeDynamicValue('{Id}', undefined, {{ValueMapperId: '{id}'}})");
     }
 
-    public void ExecuteSideEffects(RenderContext context)
-    {
-        if (!context.ValueChanges.ContainsKey(Id))
-        {
-            return;
-        }
-
-        var value = GetValue(context);
-        foreach (var sideEffect in _sideEffects)
-        {
-            sideEffect((T)value, context);
-        }
-    }
-
-    public object MapValue(RenderContext renderContext, object parentValue)
+    public override object MapValue(RenderContext renderContext, object parentValue)
     {
         // The RootValue has no mapping method
         return parentValue;
     }
 
-    public object GetValue(RenderContext renderContext)
+    public override object GetValue(RenderContext renderContext)
     {
+        if (renderContext.CalculatedValues.TryGetValue(Id, out var cachedValue))
+        {
+            return cachedValue;
+        }
         var value = GetValueWithoutSetter(renderContext);
         value = SetValue(value, renderContext);
+        renderContext.CalculatedValues[Id] = value;
         return value;
     }
 
@@ -120,11 +89,6 @@ public class RootValue<T> : HtmlNode, IMappedValue
         }
         var valueSetter = _valueSetters.GetValueOrDefault(valueChangeOptions.ValueMapperId);
         return valueSetter == null ? value : valueSetter((T) value, renderContext);
-    }
-
-    public void OnChange(Action<T, IRenderContext> onChange)
-    {
-        _sideEffects.Add(onChange);
     }
 
     public object GetValueWithoutSetter(RenderContext renderContext)
@@ -140,27 +104,5 @@ public class RootValue<T> : HtmlNode, IMappedValue
             return InitialValueCreator(renderContext);
         }
         return InitialValue;
-    }
-
-    public MappedValue<T, TMappedValue> Map<TMappedValue>(Func<T, IRenderContext, TMappedValue> valueMapper)
-    {
-        return MapWithId(valueMapper, IdUtils.CreateId(valueMapper.Method));
-    }
-    
-    public MappedValue<T, TMappedValue> Map<TMappedValue>(Func<T, TMappedValue> valueMapper)
-    {
-        return MapWithId((t, _) => valueMapper(t), IdUtils.CreateId(valueMapper.Method));
-    }
-    
-    public MappedValue<T, TMappedValue> Map<TMappedValue>(Func<TMappedValue> valueMapper)
-    {
-        return MapWithId((_, _) => valueMapper(), IdUtils.CreateId(valueMapper.Method));
-    }
-
-    private MappedValue<T, TMappedValue> MapWithId<TMappedValue>(Func<T, IRenderContext, TMappedValue> valueMapper, string id)
-    {
-        var mappedValue = new MappedValue<T, TMappedValue>(valueMapper, this, id);
-        Children.Add(mappedValue);
-        return mappedValue;
     }
 }

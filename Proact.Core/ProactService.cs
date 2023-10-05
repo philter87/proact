@@ -19,12 +19,35 @@ public class ProactService
             .Where(vc => _valuesByRootId.ContainsKey(vc.Key))
             .Select(vc => RenderValueChange(vc.Value, renderState))
             .ToList();
+        
+        ExecuteSideEffects(renderState);
+
+        // The clientChanges and sideEffects might trigger some value changes on the server "ServerValueChanges"
+        // Furthermore, we clear the CalculatedValues because they might be based on the client
+        renderState.RenderContext.ValueChanges = renderState.RenderContext.ServerValueChanges.ToDictionary(v => v.Id);
+        renderState.RenderContext.CalculatedValues = new Dictionary<string, object>();
 
         var serverChanges = renderState.RenderContext.ServerValueChanges
             .Select(command => RenderValueChange(command, renderState))
             .ToList();
 
-        return clientChanges.Concat(serverChanges).ToList();
+        return clientChanges.Concat(serverChanges)
+            .GroupBy(c => c.RootId)
+            .Select(grp => grp.Last())
+            .ToList();
+    }
+
+    private void ExecuteSideEffects(RenderState renderState)
+    {
+        var values = renderState.RenderContext.ValueChanges
+            .Where(vc => _valuesByRootId.ContainsKey(vc.Key))
+            .SelectMany(kv => _valuesByRootId[kv.Key])
+            .ToList();
+
+        foreach (var mappedValue in values)
+        {
+            mappedValue.ExecuteSideEffects(renderState.RenderContext);
+        }
     }
 
     private ValueChangeRender RenderValueChange(ValueChangeCommand valueChangeOptions, RenderState renderState)
@@ -42,7 +65,8 @@ public class ProactService
                 AddRootValueChildren(renderState);
                 return new HtmlChange(dh.Id, renderState.GetHtml());
             }).ToList(),
-            Value = Json.AsString(parent.GetValue(renderState.RenderContext))
+            Value = Json.AsString(parent.GetValue(renderState.RenderContext)),
+            RootId = parent.RootId,
         };
     }
 
