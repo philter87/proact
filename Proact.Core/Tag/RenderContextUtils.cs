@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System.Text;
+using System.Web;
 
 namespace Proact.Core.Tag;
 
@@ -13,5 +14,19 @@ public static class RenderContextUtils
         }
         var query = HttpUtility.ParseQueryString(uri.Query);
         return query.AllKeys.ToDictionary(k => k, k => new List<string>(){query[k]});
+    }
+
+    public static string CreateUrl(string relativeUrl, Dictionary<string, string> queryParameters)
+    {
+        var urlBuilder = new StringBuilder(relativeUrl);
+        var qpList = queryParameters.ToList();
+        
+        for (var index = 0; index < qpList.Count; index++)
+        {
+            var qp = qpList[index];
+            urlBuilder.Append(index == 0 ? "?" : "&");
+            urlBuilder.Append($"{qp.Key}={qp.Value}");
+        }
+        return urlBuilder.ToString();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Proact.Core.Tag;
+﻿using System.Text;
+using Proact.Core.Tag;
 
 namespace ProactTests;
 
@@ -23,5 +24,20 @@ public class RenderContextUtilsTest
 
         Assert.Single(queryParameters);
         Assert.Equal("HelloWorld", queryParameters["myParameter"][0]);
+    }
+
+    [Fact]
+    public void CreateUrl()
+    {
+        var urlPath = "/philip";
+        var qp = new Dictionary<string, string>()
+        {
+            {"middleName", "Hjorth"},
+            {"secondName","Christiansen"}
+        };
+
+        var url = RenderContextUtils.CreateUrl(urlPath, qp);
+        
+        Assert.Equal("/philip?middleName=Hjorth&secondName=Christiansen", url);
     }
 }

@@ -6,21 +6,17 @@ namespace Proact.Core.Value;
 public class RootValue<T> : ValueBase<T>
 {
     private readonly Dictionary<string, Func<T, IRenderContext, T>> _valueSetters = new();
-    private readonly Func<IRenderContext, T>? _initialValueCreator;
-    private readonly T _initialValue;
+    private readonly RootValueOptions<T> _options;
     
-    public RootValue(string id, T initialValue)
+    public RootValue(string id, T initialValue) : this(id, new RootValueOptions<T> {InitialValue = initialValue})
     {
-        Id = id;
-        RootId = id;
-        _initialValue = initialValue;
     }
-    
-    public RootValue(string id, Func<IRenderContext, T> initialValueCreator)
+
+    public RootValue(string id, RootValueOptions<T> options)
     {
         Id = id;
         RootId = id;
-        _initialValueCreator = initialValueCreator;
+        _options = options;
     }
     
     public void OnChange(Action<T, IRenderContext> onChange)
@@ -101,10 +97,10 @@ public class RootValue<T> : ValueBase<T>
             return Json.Parse<T>(valueChangeOptions.Value);
         }
 
-        if (_initialValueCreator != null)
+        if (_options.InitialValueCreator != null)
         {
-            return _initialValueCreator(renderContext);
+            return _options.InitialValueCreator(renderContext);
         }
-        return _initialValue;
+        return _options.InitialValue;
     }
 }

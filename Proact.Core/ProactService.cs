@@ -68,6 +68,7 @@ public class ProactService
             }).ToList(),
             Value = Json.AsString(parent.GetValue(renderState.RenderContext)),
             RootId = parent.RootId,
+            NextUrl = renderState.RenderContext.NextUrl,
         };
     }
 

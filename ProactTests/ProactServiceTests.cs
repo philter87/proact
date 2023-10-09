@@ -224,6 +224,13 @@ public class ProactServiceTests
         Assert.Equal(1, functionCount);
     }
 
+    [Fact]
+    public void Navigate()
+    {
+        var middleName = DynamicValue.CreateQueryParameter("middleName");
+        var secondName = DynamicValue.CreateQueryParameter("secondName");
+    }
+
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)
     {
         return PartialRenderWithValue(tag, TriggerId, value);

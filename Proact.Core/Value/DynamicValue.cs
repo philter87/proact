@@ -11,7 +11,10 @@ public static class DynamicValue
     
     public static RootValue<T> CreateWithContext<T>(string id, Func<IRenderContext, T> initialValueCreator)
     {
-        return new RootValue<T>(id, initialValueCreator);
+        return new RootValue<T>(id, new RootValueOptions<T>
+        {
+            InitialValueCreator = initialValueCreator, 
+        });
     }
 
     public static RootValue<string?> CreatePathParameter(string pathParameter)

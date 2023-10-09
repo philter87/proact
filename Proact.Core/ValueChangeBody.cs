@@ -5,6 +5,7 @@ public class ValueChangeRender
     public string RootId { get; set; }
     public object? Value { get; set; }
     public List<HtmlChange> Changes { get; set; } = new();
+    public string? NextUrl { get; set; }
 }
 
 public class HtmlChange

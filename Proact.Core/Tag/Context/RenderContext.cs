@@ -8,7 +8,7 @@ public class RenderContext : IRenderContext
     public IServiceProvider ServiceProvider { get; set; }
     public string CurrentUrlPath { get; set; }
     public string CurrentUrlPattern { get; set; }
-    public string NextUrlPath { get; set; }
+    public string? NextUrl { get; set; }
     public Dictionary<string, List<string>> QueryParameters { get; set; }
     public Dictionary<string, string> PathParameters { get; set; }
     public Dictionary<string, ValueChangeCommand> ValueChanges { get; set; }
@@ -29,18 +29,8 @@ public class RenderContext : IRenderContext
     public void Navigate(string relativeUrl, Dictionary<string, string> queryParameters)
     {
         ServerValueChanges.Add(new ValueChangeCommand(Constants.RouteUrlValueId, relativeUrl));
-        
-        var urlBuilder = new StringBuilder(relativeUrl);
-        var qpList = queryParameters.ToList();
-        
-        for (var index = 0; index < qpList.Count; index++)
-        {
-            var qp = qpList[index];
-            ServerValueChanges.Add(new ValueChangeCommand(qp.Key, qp.Value));
-            urlBuilder.Append(index == 0 ? "?" : "&");
-            urlBuilder.Append($"{qp.Key}={qp.Value}");
-        }
-        NextUrlPath = urlBuilder.ToString();
+        ServerValueChanges.AddRange(queryParameters.Select(qp => new ValueChangeCommand(qp.Key, qp.Value)));
+        NextUrl = RenderContextUtils.CreateUrl(relativeUrl, queryParameters);
     }
 
     public S? GetService<S>() where S: class
