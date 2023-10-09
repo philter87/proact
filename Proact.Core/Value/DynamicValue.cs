@@ -1,6 +1,6 @@
 ﻿using Proact.Core.Tag.Context;
 
-namespace Proact.Core.Tag;
+namespace Proact.Core.Value;
 
 public static class DynamicValue
 {
@@ -22,7 +22,7 @@ public static class DynamicValue
     public static RootValue<string?> CreateQueryParameter(string queryParameter)
     {
         return CreateWithContext(queryParameter,
-            c => c.QueryParameters.GetValueOrDefault(queryParameter, new List<string> {""})[0]);
+            c => c.QueryParameters.TryGetValue(queryParameter, out var values) ? values[0] : null);
     }
     public static RootValue<List<string>> CreateQueryParameters(string queryParameter)
     {

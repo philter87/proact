@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Proact.Core;
 using Proact.Core.Tag;
 using Proact.Core.Tag.Context;
+using Proact.Core.Value;
 using static Proact.Core.Tags;
 
 namespace ProactTests;

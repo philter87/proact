@@ -1,25 +1,27 @@
-﻿using Proact.Core.Tag.Context;
+﻿using Proact.Core.Tag;
+using Proact.Core.Tag.Context;
 
-namespace Proact.Core.Tag;
+namespace Proact.Core.Value;
 
 public class RootValue<T> : ValueBase<T>
 {
     private readonly Dictionary<string, Func<T, IRenderContext, T>> _valueSetters = new();
+    private readonly Func<IRenderContext, T>? _initialValueCreator;
+    private readonly T _initialValue;
+    
     public RootValue(string id, T initialValue)
     {
         Id = id;
         RootId = id;
-        InitialValue = initialValue;
+        _initialValue = initialValue;
     }
     
     public RootValue(string id, Func<IRenderContext, T> initialValueCreator)
     {
         Id = id;
         RootId = id;
-        InitialValueCreator = initialValueCreator;
+        _initialValueCreator = initialValueCreator;
     }
-    private T InitialValue { get; set; }
-    private Func<IRenderContext, T>? InitialValueCreator { get; set; }
     
     public void OnChange(Action<T, IRenderContext> onChange)
     {
@@ -91,7 +93,7 @@ public class RootValue<T> : ValueBase<T>
         return valueSetter == null ? value : valueSetter((T) value, renderContext);
     }
 
-    public object GetValueWithoutSetter(RenderContext renderContext)
+    private object GetValueWithoutSetter(IRenderContext renderContext)
     {
         var valueChangeOptions = renderContext.ValueChanges.GetValueOrDefault(Id);
         if (valueChangeOptions != null)
@@ -99,10 +101,10 @@ public class RootValue<T> : ValueBase<T>
             return Json.Parse<T>(valueChangeOptions.Value);
         }
 
-        if (InitialValueCreator != null)
+        if (_initialValueCreator != null)
         {
-            return InitialValueCreator(renderContext);
+            return _initialValueCreator(renderContext);
         }
-        return InitialValue;
+        return _initialValue;
     }
 }

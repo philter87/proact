@@ -34,14 +34,14 @@ async function changeDynamicValue(id, value, opts) {
 window.addEventListener('popstate', async e => {
     const newPath = document.location.pathname;
     console.log(newPath)
-    return changeDynamicValue('proact-routing', newPath)
+    return changeDynamicValue('proact-route-url', newPath)
 });
 async function proactNavigate(path, event){
     if(event){
         event.preventDefault();
     }
     window.history.pushState({}, '', path)
-    return changeDynamicValue('proact-routing', path)
+    return changeDynamicValue('proact-route-url', path)
 }
 
 const proactFormSubmit = async (id, event) => {

@@ -1,4 +1,5 @@
 ﻿using Proact.Core.Tag.Context;
+using Proact.Core.Value;
 using static Proact.Core.Tags;
 
 namespace Proact.Core.Tag;
@@ -7,7 +8,7 @@ public static class Routes
 {
     public static HtmlTag Create(params Route[] routes)
     {
-        var currentRoute = DynamicValue.CreateWithContext("proact-routing", r => r.CurrentUrlPath);
+        var currentRoute = DynamicValue.CreateWithContext(Constants.RouteUrlValueId, r => r.CurrentUrlPath);
         return div().With(currentRoute.Map((currentPath, c) => FindMatchingRoute(routes, currentPath, c)));
     }
 

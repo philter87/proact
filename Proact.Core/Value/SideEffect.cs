@@ -1,6 +1,6 @@
 ﻿using Proact.Core.Tag.Context;
 
-namespace Proact.Core.Tag;
+namespace Proact.Core.Value;
 
 public class SideEffect
 {

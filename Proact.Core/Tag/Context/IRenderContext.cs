@@ -1,4 +1,6 @@
-﻿namespace Proact.Core.Tag.Context;
+﻿using Proact.Core.Value;
+
+namespace Proact.Core.Tag.Context;
 
 public interface IRenderContext
 {
@@ -14,7 +16,7 @@ public interface IRenderContext
     public Dictionary<string, ValueChangeCommand> ValueChanges { get; set; }
     
     public void TriggerValueChange<T>(RootValue<T> value, T newValue);
-    // public void Navigate();
+    public void Navigate(string relativeUrl, Dictionary<string, string> queryParameters);
     
     
     // public void SetHttpCookie();

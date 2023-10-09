@@ -1,6 +1,7 @@
-﻿using Proact.Core.Tag.Context;
+﻿using Proact.Core.Tag;
+using Proact.Core.Tag.Context;
 
-namespace Proact.Core.Tag;
+namespace Proact.Core.Value;
 
 public class MappedValue<TInput, TReturn> : ValueBase<TInput>
 {

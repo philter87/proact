@@ -1,7 +1,7 @@
 ﻿using Proact.Core.Tag;
 using Proact.Core.Tag.Context;
 
-namespace Proact.Core;
+namespace Proact.Core.Value;
 
 public abstract class ValueBase<T> : HtmlNode, IMappedValue
 {

@@ -1,4 +1,5 @@
 ﻿using Proact.Core.Tag;
+using Proact.Core.Value;
 using static Proact.Core.Tags;
 
 namespace ProactTests;
@@ -35,7 +36,7 @@ public class RoutesTest
     {
         var url = "/home?myQueryParameter=HelloWorld";
         var routing = Routes.Create(
-            new Route("/home", PageWithQueryParameter())
+            new Route("/home", PageWithQueryParameter("myQueryParameter"))
         );
 
         var route = routing.Render(Any.RenderStateWithUrl(url));
@@ -43,9 +44,9 @@ public class RoutesTest
         Assert.Contains("HelloWorld", route.GetHtml());
     }
     
-    private static HtmlTag PageWithQueryParameter()
+    private static HtmlTag PageWithQueryParameter(string queryParameterName)
     {
-        var queryParameter = DynamicValue.CreateQueryParameter("myQueryParameter");
+        var queryParameter = DynamicValue.CreateQueryParameter(queryParameterName);
         return div().With("Home", queryParameter);
     }
     
