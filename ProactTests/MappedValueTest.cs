@@ -98,7 +98,7 @@ public class MappedValueTest
 
         var renderState = fullName.Render(Any.RenderState);
         
-        Assert.Equal("<span data-dynamic-value-id=\"AAjya4+X\">Philip C</span>", renderState.GetHtml());
+        Assert.Equal("<span data-dynamic-value-id=\"fZLpfGTZ\">Philip C</span>", renderState.GetHtml());
     }
     
     [Fact]

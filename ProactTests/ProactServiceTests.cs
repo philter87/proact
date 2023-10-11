@@ -51,7 +51,7 @@ public class ProactServiceTests
         Func<int, int> valueSetter = v => v + 1;
     
         var tag = div().With(
-            button(onclick: dynamicValue.Set(valueSetter)),
+            button(onclick: dynamicValue.Js.Set(valueSetter)),
             dynamicValue.Map((v, _) => p().With(v + ""))
         );
     
@@ -173,14 +173,14 @@ public class ProactServiceTests
     public void When_firstName_is_changed_another_value_is_changed_with_TriggerValueChange_on_the_server()
     {
         var firstName = DynamicValue.Create("first", "Phil");
-        var secondName = DynamicValue.Create("shouldNavigate", "NotRelevant");
+        var lastName = DynamicValue.Create("shouldNavigate", "NotRelevant");
         var tag = div().With(
             firstName.Map((v, c) =>
             {
-                c.TriggerValueChange(secondName, "Christiansen");
+                c.TriggerValueChange(lastName, "Christiansen");
                 return "Philip";
             }),
-            secondName
+            lastName
         );
 
         var renders = PartialRenderAll(tag, "first", "Philip");
@@ -192,12 +192,12 @@ public class ProactServiceTests
     public void When_firstName_is_changed_then_secondName_is_changed_with_OnChange()
     {
         var firstName = DynamicValue.Create("first", "Phil");
-        var secondName = DynamicValue.Create("secondName", "NotRelevant");
+        var lastname = DynamicValue.Create("secondName", "NotRelevant");
         
-        firstName.OnChange((v,c ) => c.TriggerValueChange(secondName,"Christiansen"));
+        firstName.OnChange((v,c ) => c.TriggerValueChange(lastname,"Christiansen"));
         var tag = div().With(
             firstName,
-            secondName
+            lastname
         );
         
         var renders = PartialRenderAll(tag, "first", "Philip");
@@ -227,8 +227,16 @@ public class ProactServiceTests
     [Fact]
     public void Navigate()
     {
-        var middleName = DynamicValue.CreateQueryParameter("middleName");
-        var secondName = DynamicValue.CreateQueryParameter("secondName");
+        var name = DynamicValue.CreateQueryParameter("name", "Philip");
+        var routes = Routes.Create(
+            new Route("/hello", div().With("Hello: ", name)),
+            new Route("/anotherRoute", div().With("AnotherRoute"))
+            );
+        
+        name.OnChange((v, c) => c.Navigate("/anotherRoute"));
+
+        var result = PartialRenderAll(routes, "name", "PHILIP");
+        Assert.Contains("AnotherRoute", result[1].Changes[0].Html);
     }
 
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)

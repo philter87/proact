@@ -32,6 +32,12 @@ public class RenderContext : IRenderContext
         ServerValueChanges.AddRange(queryParameters.Select(qp => new ValueChangeCommand(qp.Key, qp.Value)));
         NextUrl = RenderContextUtils.CreateUrl(relativeUrl, queryParameters);
     }
+    
+    public void Navigate(string relativeUrl)
+    {
+        ServerValueChanges.Add(new ValueChangeCommand(Constants.RouteUrlValueId, relativeUrl));
+        NextUrl = relativeUrl;
+    }
 
     public S? GetService<S>() where S: class
     {

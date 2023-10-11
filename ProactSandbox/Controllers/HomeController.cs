@@ -35,17 +35,17 @@ public class HomeController : Controller
                     div(),
                     "Blabla",
                     div(),
-                    button(onclick: stringValue.Run()).With("RefreshTime!!!"),
+                    button(onclick: stringValue.Js.Run()).With("RefreshTime!!!"),
                     stringValue.Map(() => p().With(DateTimeOffset.Now.ToString("O"))),
                     stringValue.Map(() => p().With(DateTimeOffset.Now.ToString("T"))),
-                    input(name: "firstName", oninput: inputValue.SetFromThisValue()),
+                    input(name: "firstName", oninput: inputValue.Js.SetFromThisValue()),
                     inputValue.Map(v => p().With(v.ToString())),
                     inputValue,
                     list.Select(s => s).ToList(),
-                    button(onclick: counter.Set(v => v + 1)).With("Increment counter"),
+                    button(onclick: counter.Js.Set(v => v + 1)).With("Increment counter"),
                     counter.Map(v => span().With(v.ToString())),
                     counter,
-                    new Form(onsubmit: form.SetOnSubmit())
+                    new Form(onsubmit: form.Js.SetOnSubmit())
                     {
                         new Input(type:"text", name:nameof(SignUpForm.FirstName)),
                         new Input(type:"text", name:nameof(SignUpForm.SecondName)),

@@ -1,13 +1,12 @@
-﻿using Proact.Core.Tag;
-using Proact.Core.Tag.Context;
+﻿using Proact.Core.Tag.Context;
 
 namespace Proact.Core.Value;
 
 public class RootValue<T> : ValueBase<T>
 {
-    private readonly Dictionary<string, Func<T, IRenderContext, T>> _valueSetters = new();
     private readonly RootValueOptions<T> _options;
-    
+    public Javascript<T> Js { get; }
+
     public RootValue(string id, T initialValue) : this(id, new RootValueOptions<T> {InitialValue = initialValue})
     {
     }
@@ -17,47 +16,12 @@ public class RootValue<T> : ValueBase<T>
         Id = id;
         RootId = id;
         _options = options;
+        Js = new Javascript<T>(id);
     }
     
     public void OnChange(Action<T, IRenderContext> onChange)
     {
         SideEffects.Add(SideEffect.Create(onChange));
-    }
-    
-    public JavascriptCode Run()
-    {
-        return new JavascriptCode($"changeDynamicValue('{Id}')");
-    }
-    
-    public JavascriptCode SetFromThisValue()
-    {
-        return new JavascriptCode($"changeDynamicValue('{Id}', this.value)");
-    }
-
-    public JavascriptCode SetOnSubmit()
-    {
-        return new JavascriptCode($"proactFormSubmit('{Id}', event)");
-    }
-
-    public JavascriptCode Set(Func<T, IRenderContext, T> setter)
-    {
-        return AddSetter(setter, IdUtils.CreateId(setter.Method));
-    }
-    
-    public JavascriptCode Set(Func<T, T> setter)
-    {
-        return AddSetter((v, _) => setter(v), IdUtils.CreateId(setter.Method));
-    }
-    
-    public JavascriptCode Set(Func<T> setter)
-    {
-        return AddSetter((_, _) => setter(), IdUtils.CreateId(setter.Method));
-    }
-    
-    private JavascriptCode AddSetter(Func<T, IRenderContext, T> setter, string id)
-    {
-        _valueSetters.Add(id, setter);
-        return new JavascriptCode($"changeDynamicValue('{Id}', undefined, {{ValueMapperId: '{id}'}})");
     }
 
     public override object MapValue(RenderContext renderContext, object parentValue)
@@ -73,20 +37,9 @@ public class RootValue<T> : ValueBase<T>
             return cachedValue;
         }
         var value = GetValueWithoutSetter(renderContext);
-        value = SetValue(value, renderContext);
+        value = Js.GetFromValueSetter(value, renderContext);
         renderContext.CalculatedValues[Id] = value;
         return value;
-    }
-
-    private object SetValue(object value, RenderContext renderContext)
-    {
-        var valueChangeOptions = renderContext.ValueChanges.GetValueOrDefault(Id);
-        if (valueChangeOptions is not { ValueMapperId: not null })
-        {
-            return value;
-        }
-        var valueSetter = _valueSetters.GetValueOrDefault(valueChangeOptions.ValueMapperId);
-        return valueSetter == null ? value : valueSetter((T) value, renderContext);
     }
 
     private object GetValueWithoutSetter(IRenderContext renderContext)

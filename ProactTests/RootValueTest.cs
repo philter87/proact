@@ -13,7 +13,7 @@ public class RootValueTest
         var val = DynamicValue.Create("id", "Hello");
         Func<string, string> valueSetter = s => s.ToUpper(); 
 
-        val.Set(valueSetter);
+        val.Js.Set(valueSetter);
 
         var renderContext = Any.RenderStateWithValue("id", "Hello", IdUtils.CreateId(valueSetter.Method));
         Assert.Equal("HELLO", val.GetValue(renderContext.RenderContext));
@@ -98,8 +98,8 @@ public class RootValueTest
         });
 
         var renderContext = Any.RenderContextDefault;
+        fullName.GetValue(renderContext);
         var v = fullName.GetValue(renderContext);
-        v = fullName.GetValue(renderContext);
         
         Assert.Equal(2, functionCalls);
         Assert.Equal("Phil Hjorth Christiansen", v);

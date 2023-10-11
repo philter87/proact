@@ -17,6 +17,7 @@ public interface IRenderContext
     
     public void TriggerValueChange<T>(RootValue<T> value, T newValue);
     public void Navigate(string relativeUrl, Dictionary<string, string> queryParameters);
+    public void Navigate(string relativeUrl);
     
     
     // public void SetHttpCookie();

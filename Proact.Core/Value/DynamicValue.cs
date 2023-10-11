@@ -24,11 +24,27 @@ public static class DynamicValue
 
     public static RootValue<string?> CreateQueryParameter(string queryParameter)
     {
-        return CreateWithContext(queryParameter,
-            c => c.QueryParameters.TryGetValue(queryParameter, out var values) ? values[0] : null);
+        return new RootValue<string?>(queryParameter, new RootValueOptions<string?>()
+        {
+            InitialValueCreator = c => c.QueryParameters.TryGetValue(queryParameter, out var values) ? values[0] : null,
+            IsQueryParameter = true,
+        });
+    }
+    
+    public static RootValue<string> CreateQueryParameter(string queryParameter, string defaultValue)
+    {
+        return new RootValue<string>(queryParameter, new RootValueOptions<string>()
+        {
+            InitialValueCreator = c => c.QueryParameters.TryGetValue(queryParameter, out var values) ? values[0] : defaultValue,
+            IsQueryParameter = true,
+        });
     }
     public static RootValue<List<string>> CreateQueryParameters(string queryParameter)
     {
-        return CreateWithContext(queryParameter, c => c.QueryParameters.GetValueOrDefault(queryParameter, new List<string>()));
+        return new RootValue<List<string>>(queryParameter, new RootValueOptions<List<string>>()
+        {
+            InitialValueCreator = c => c.QueryParameters.GetValueOrDefault(queryParameter, new List<string>()),
+            IsQueryParameter = true,
+        });
     }
 }
