@@ -18,10 +18,16 @@ public static class TagsMeta
         {"h3", CreateAttributes()},
         {"h4", CreateAttributes()},
         {"h5", CreateAttributes()},
+        {"link", CreateAttributes("href","rel")},
+        {"meta", CreateAttributes("name", "content", "charset")},
         {"h6", CreateAttributes()},
+        {"label", CreateAttributes()},
         {"form", CreateAttributes("onsubmit","name", "action", "method", "enctype", "target")},
         {"input", CreateAttributes("type", "name", "oninput", "value")},
         {"button", CreateAttributes("name", "type", "value")},
+        {"script", CreateAttributes("type", "src")},
+        {"header", CreateAttributes()},
+        {"nav", CreateAttributes()}
     }.ToImmutableDictionary();
 
     private static List<string> CreateAttributes(params string[] additionalAttributes)

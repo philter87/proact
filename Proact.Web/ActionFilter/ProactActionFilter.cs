@@ -19,10 +19,12 @@ public class ProactActionFilter : IActionFilter
 
     public void OnActionExecuting(ActionExecutingContext context)
     {
+        // We only want to add a path on POST requests where values are changed
         if (context.HttpContext.Request.Method != "POST" && !context.HttpContext.Request.Query.ContainsKey(ValueChangeRequest))
         {
             return;
         }
+        
         
         var renderState = new RenderState(RenderContextWeb.CreateWithValue(context.HttpContext));
         var jsonResult = _proactService.RenderPartial(renderState);

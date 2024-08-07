@@ -9,10 +9,10 @@ public class IdUtilsTests
     [Fact]
     public void CreateId()
     {
-        Func<int, IRenderContext, int> valueSetter = (v, sp) => v + 1;
-        Func<int, IRenderContext, int> valueSetter1 = (v, sp) => v+1;
+        Func<int, IRenderContext, int> valueSetter = (v, c) => v + 1;
+        Func<int, IRenderContext, int> valueSetter1 = (v, c) => v+1;
         Func<int, IRenderContext, int> valueSetter2 = Create();
-        Func<int, IRenderContext, int> valueSetter3 = (v, sp) => v + 2;
+        Func<int, IRenderContext, int> valueSetter3 = (v, c) => v + 2;
 
 
         var hash = IdUtils.CreateId(valueSetter.Method);
@@ -20,6 +20,7 @@ public class IdUtilsTests
         var hash2 = IdUtils.CreateId(valueSetter2.Method);
         var hash3 = IdUtils.CreateId(valueSetter3.Method);
         
+        Assert.Equal("vOgJv3VS", hash);
         Assert.Equal(hash, hash1);
         Assert.Equal(hash, hash2);
         Assert.NotEqual(hash, hash3);

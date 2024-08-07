@@ -1,5 +1,4 @@
-﻿using Proact.Core.Tag;
-using Proact.Core.Tag.Context;
+﻿using Proact.Core.Tag.Context;
 using Proact.Core.Value;
 
 namespace ProactTests;
@@ -16,7 +15,6 @@ public class MappedValueTest
 
         Assert.Equal("PhilipC", value);
     }
-    
     
     [Fact]
     public void GetValue_with_several_mappings()
@@ -98,7 +96,9 @@ public class MappedValueTest
 
         var renderState = fullName.Render(Any.RenderState);
         
-        Assert.Equal("<span data-dynamic-value-id=\"fZLpfGTZ\">Philip C</span>", renderState.GetHtml());
+        // The data-dynamic-value-id changes when this file is changed (Verify that this is the only case).
+        // This might be a problem when releasing a new version of an app that the id changes 
+        Assert.Equal("<span data-dynamic-value-id=\"Ic7EH0jW\">Philip C</span>", renderState.GetHtml());
     }
     
     [Fact]
@@ -113,15 +113,15 @@ public class MappedValueTest
     public void Render_input_123_is_converted_to_133_in_child()
     {
         var parent = new RootValue<int>("value", 123);
-        var child = parent.Map((i, c) => i + 10);
+        var child = parent.Map((i, c) => i + 30);
 
-        HtmlTestUtils.Equal("<span>133</span>", child.Render(Any.RenderState));
+        HtmlTestUtils.Equal("<span>153</span>", child.Render(Any.RenderState));
     }
 
-    private static void TestMapper<T, TReturn>(T initialValue, Func<T, IRenderContext, TReturn> Mapper, string expected)
+    private static void TestMapper<T, TReturn>(T initialValue, Func<T, IRenderContext, TReturn> mapper, string expected)
     {
         var val = new RootValue<T>("id", initialValue);
-        var mapped = val.Map(Mapper);
+        var mapped = val.Map(mapper);
         
         var renderState = mapped.Render(Any.RenderState);
 

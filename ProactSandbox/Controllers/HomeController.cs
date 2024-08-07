@@ -11,6 +11,7 @@ namespace ProactSandbox.Controllers;
 [ApiController]
 public class HomeController : Controller
 {
+
     [Route("/{*AnyPath}")]
     public HtmlNode Get()
     {
@@ -22,7 +23,7 @@ public class HomeController : Controller
         var inputValue = DynamicValue.Create("onInputChange", "Nothing");
         var list = new List<HtmlNode>()
         {
-            p().With("First element in a list"),
+            p().With("First element in a list!"),
             p().With("Seconds element in a list")
         };
 

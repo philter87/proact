@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Proact.Core;
 using Proact.Core.Tag;
 using Proact.Core.Tag.Context;
@@ -225,7 +224,7 @@ public class ProactServiceTests
     }
 
     [Fact]
-    public void Navigate()
+    public void Navigate_is_called_when_name_is_changed_and_it_causes_the_route_to_change()
     {
         var name = DynamicValue.CreateQueryParameter("name", "Philip");
         var routes = Routes.Create(
@@ -234,9 +233,10 @@ public class ProactServiceTests
             );
         
         name.OnChange((v, c) => c.Navigate("/anotherRoute"));
-
         var result = PartialRenderAll(routes, "name", "PHILIP");
-        Assert.Contains("AnotherRoute", result[1].Changes[0].Html);
+        
+        HtmlTestUtils.Equal("<div>AnotherRoute</div>", result[1].Changes[0]);
+        // Assert.Equal("/anotherRoute", result[1].NextUrl);
     }
 
     private string PartialRenderWithValue<T>(HtmlTag tag, T value)
